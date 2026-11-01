@@ -10,6 +10,7 @@ This document describes how to deploy and run the clean distributable **YOUPI PG
 - **Node.js**: Version `>= 20.0.0` (LTS recommended).
 - **Package Manager**: `npm` (included with Node.js).
 - **Network Ports**:
+  - `4000`: Public Website & Documentation Portal
   - `6100`: Payment Core API
   - `7000`: Checkout Portal & `youpi.js` SDK host
   - `6001`: Merchant Admin Panel
@@ -69,7 +70,9 @@ Starts services in background daemon mode.
 
 ## 3. Verifying Your Installation
 
-1. **Checkout Portal & SDK**:
+1. **Public Website & Docs**:
+   Open `http://localhost:4000` — landing page, live gateway status and every guide under `/docs`.
+2. **Checkout Portal & SDK**:
    Open `http://localhost:7000/youpi.js` — you should see the official JavaScript SDK.
 2. **Demo Store**:
    Open `http://localhost:5000` — you should see the reference YOUPI Store with the interactive buy button and Developer Guide.

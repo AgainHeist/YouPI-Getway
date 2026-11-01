@@ -42,7 +42,7 @@
 [![WhatsApp Berry Auth](https://img.shields.io/badge/Auth-WhatsApp%20OTP-25d366?style=for-the-badge&logo=whatsapp&logoColor=white)](#)
 [![SQLite WAL](https://img.shields.io/badge/Database-SQLite%20Native%20WAL-003b57?style=for-the-badge&logo=sqlite&logoColor=white)](#)
 [![Native Android Observer](https://img.shields.io/badge/Android-Kotlin%20Observer%20APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](#)
-[![Regression Tests](https://img.shields.io/badge/Tests-39%20Curated%20Suites-success?style=for-the-badge&logo=vitest&logoColor=white)](#)
+[![Regression Tests](https://img.shields.io/badge/Tests-40%20Curated%20Suites-success?style=for-the-badge&logo=vitest&logoColor=white)](#)
 [![White Label Ready](https://img.shields.io/badge/Branding-100%25%20White--Label-f59e0b?style=for-the-badge&logo=target&logoColor=white)](#)
 
 <br/>
@@ -281,13 +281,13 @@ npm test
 ```text
 ============================================================
  YOUPI PG V2 — FULL REGRESSION TEST RUNNER
-Running 39 curated test suites...
+Running 40 curated test suites...
 ============================================================
-[1/39] Testing packages/common/src/__tests__/common.test.js...  PASS (0.22s)
+[1/40] Testing packages/common/src/__tests__/common.test.js...  PASS (0.22s)
 ...
-[39/39] Testing scripts/production-infrastructure.test.js...  PASS (0.17s)
+[40/40] Testing scripts/production-infrastructure.test.js...  PASS (0.17s)
 ============================================================
- ALL 39 TEST SUITES PASSED CLEANLY (Total: 34.02s)
+ ALL 40 TEST SUITES PASSED CLEANLY (Total: 34.02s)
 ============================================================
 ```
 
@@ -547,6 +547,7 @@ YOUPI PG confirms payments without expensive commercial banking APIs using a tri
 
 | Service | Port | Directory | Entrypoint | Responsibility |
 | :--- | :---: | :--- | :--- | :--- |
+| **Public Website** | `4000` | [`apps/website`](apps/website) | `src/index.js` | Marketing site, comparison page and the rendered documentation portal |
 | **Payment API** | `6100` | [`apps/payment-api`](apps/payment-api) | `src/index.js` | Core REST API, state machine, DB transactions & SSE stream |
 | **Checkout Portal** | `7000` | [`apps/checkout-portal`](apps/checkout-portal) | `src/index.js` | Customer iframe checkout, dynamic vector QR, SDK bundle |
 | **Merchant Admin** | `6001` | [`apps/merchant-admin`](apps/merchant-admin) | `src/index.js` | Operations panel, till billing desk, branding customizer |

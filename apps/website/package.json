@@ -1,0 +1,13 @@
+{
+  "name": "@youpi/website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Public marketing website and documentation portal for YOUPI PG",
+  "main": "./src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test src/__tests__/**/*.test.js"
+  },
+  "dependencies": {}
+}

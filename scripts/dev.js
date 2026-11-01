@@ -40,6 +40,7 @@ await cc.processManager.startAll();
 console.log('====================================================');
 console.log('🟢 ALL SERVICES ONLINE & OPERATIONAL');
 console.log('====================================================');
+console.log('• Public Website & Docs Portal:  http://localhost:4000');
 console.log('• Merchant Panel & Control Hub: http://localhost:6001');
 console.log('• Payment Core REST API:        http://localhost:6100');
 console.log('• Customer Checkout Portal:     http://localhost:7000/checkout/:id');

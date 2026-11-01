@@ -105,6 +105,7 @@ console.log(runInLocalhostMode
   : '🟢 YOUPI PG V2 PRODUCTION GATEWAY ONLINE & ACTIVE');
 console.log('====================================================');
 console.log(runInLocalhostMode ? 'LOCAL SERVICE ROUTES:' : 'AUTHORITATIVE PUBLIC CLOUDFLARE ROUTES:');
+console.log(`• Public Website:       http://localhost:${process.env.WEBSITE_PORT || 4000}  (-> :4000)`);
 console.log(`• Checkout Portal:      ${runtimeUrls.checkoutUrl}  (-> :7000)`);
 console.log(`• Payment Core API:     ${runtimeUrls.apiUrl}  (-> :6100)`);
 console.log(`• Merchant Admin Hub:   ${runtimeUrls.adminUrl}  (-> :6001)`);

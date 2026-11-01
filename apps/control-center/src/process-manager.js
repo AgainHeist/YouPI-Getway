@@ -70,6 +70,17 @@ export class ProcessManager extends EventEmitter {
         pid: null
       },
       {
+        id: 'website',
+        name: 'Public Website & Docs Portal',
+        script: path.join(rootDir, 'apps/website/src/index.js'),
+        port: Number(process.env.WEBSITE_PORT || 4000),
+        healthPath: '/health',
+        child: null,
+        status: 'STOPPED',
+        startTime: null,
+        pid: null
+      },
+      {
         id: 'coin-wallet-store',
         name: 'YOUPI Showcase Store (Demo)',
         script: path.join(rootDir, 'apps/coin-wallet-store/src/index.js'),

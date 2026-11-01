@@ -37,4 +37,4 @@ Verify all invariants locally before committing:
 npm run typecheck
 npm test
 ```
-All 39 test suites must pass 100% cleanly.
+All 40 test suites must pass 100% cleanly.
