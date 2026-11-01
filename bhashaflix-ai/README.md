@@ -262,6 +262,8 @@ platform proxy is the only thing that could still block it. Because the UI keeps
 pkg update
 pkg install python ffmpeg espeak git python-numpy   # NOTE: the package is `espeak`, not `espeak-ng`
 git clone -b arena/b2c2def4-youpi-getway https://github.com/AgainHeist/YouPI-Getway
+# already cloned earlier (main branch)? reuse it instead of cloning again:
+#   cd YouPI-Getway && git fetch origin arena/b2c2def4-youpi-getway && git switch arena/b2c2def4-youpi-getway
 cd YouPI-Getway/bhashaflix-ai          # the app lives in this sub-folder
 pip install -r requirements-termux.txt # no PyAV / no imageio-ffmpeg: nothing to compile against libav
 python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000
@@ -293,6 +295,7 @@ python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000
 |---|---|---|
 | `E: Unable to locate package espeak-ng` | Termux ships eSpeak **NG** under the package name `espeak` | `pkg install espeak` |
 | `bash: cd: YouPI-Getway/bhashaflix-ai: No such file or directory` | You cloned the default branch (`main`), which does not contain the app yet | `git clone -b arena/b2c2def4-youpi-getway <repo>` or merge the open PR first, then `cd YouPI-Getway/bhashaflix-ai` |
+| `fatal: destination path 'YouPI-Getway' already exists` | The earlier (wrong-branch) clone is still there | `cd ~ && rm -rf YouPI-Getway` and clone again, **or** reuse it: `cd YouPI-Getway && git fetch origin arena/b2c2def4-youpi-getway && git switch arena/b2c2def4-youpi-getway` |
 | `ERROR: Could not open requirements file: requirements.txt` | You are in the repo root; the app is one level down | `cd bhashaflix-ai` |
 | `ModuleNotFoundError: No module named 'backend'` | uvicorn was started outside `bhashaflix-ai/`, or the requirements never installed | `cd bhashaflix-ai && pip install -r requirements-termux.txt` |
 | `pip install numpy` builds forever / `pydantic-core` needs rust | Termux is not `manylinux`; no prebuilt wheels | `pkg install python-numpy rust`, then re-run the pip step |

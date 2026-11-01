@@ -12,6 +12,19 @@ say()  { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
 warn() { printf '\033[1;33m[!] %s\033[0m\n' "$*"; }
 ok()   { printf '\033[1;32m[ok]\033[0m %s\n' "$*"; }
 
+# The script must run from inside bhashaflix-ai/ (where backend/ and requirements-*.txt live).
+if [ ! -f "backend/app.py" ]; then
+  warn "Run this from the bhashaflix-ai folder (I cannot see backend/app.py here)."
+  cat <<'FIX'
+  cd ~
+  rm -rf YouPI-Getway                                    # remove the main-branch clone, if any
+  git clone -b arena/b2c2def4-youpi-getway https://github.com/AgainHeist/YouPI-Getway
+  cd YouPI-Getway/bhashaflix-ai
+  bash scripts/termux_setup.sh
+FIX
+  exit 1
+fi
+
 if [ ! -d "/data/data/com.termux/files/usr" ]; then
   warn "This does not look like Termux. On a normal Linux box use: pip install -r requirements.txt"
 fi
