@@ -1,0 +1,22 @@
+# BhashaFlix AI — Termux (Android) runtime
+#
+# Install these INSIDE Termux, not on a laptop.  Differences from
+# requirements.txt:
+#   * no PyAV  -> audio is decoded by piping through the ffmpeg binary
+#     (`pkg install ffmpeg`), so nothing has to be compiled against libav.
+#   * no imageio-ffmpeg -> its bundled binary is glibc/x86_64+arm64, which does
+#     not run on Android; the system ffmpeg package is used instead.
+#   * uvicorn without [standard] -> avoids uvloop/httptools C builds.
+#
+# Order matters.  Run scripts/termux_setup.sh, which does the pkg installs
+# (python-numpy is prebuilt for Android — building numpy from source is slow).
+
+fastapi>=0.110,<1.0
+uvicorn>=0.27,<1.0
+python-multipart>=0.0.9
+pydantic>=2.6,<3.0
+numpy>=1.26
+
+# Optional: only if `pkg install espeak` is not available on your mirror.
+# A system espeak-ng is found automatically ($PREFIX/lib/libespeak-ng.so).
+# espeakng-loader>=0.2.4

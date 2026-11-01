@@ -94,6 +94,8 @@ def locate_espeak() -> tuple[str | None, str | None]:
         lib_candidates.append(f"{base}/libespeak-ng.so")
         lib_candidates.append(f"{base}/libespeak-ng.so.1")
         lib_candidates.append(f"{base}/libespeak-ng.dylib")
+        lib_candidates.append(f"{base}/libespeak.so")
+        lib_candidates.append(f"{base}/libespeak.so.1")
         data_candidates.append(f"{base}/espeak-ng-data")
     for base in (
         "/data/data/com.termux/files/usr/share",

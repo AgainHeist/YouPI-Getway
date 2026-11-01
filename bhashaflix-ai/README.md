@@ -259,18 +259,43 @@ platform proxy is the only thing that could still block it. Because the UI keeps
 **"Can the whole app run inside Termux?"** Yes for the free pipeline, no for the big models:
 
 ```bash
-pkg update && pkg install python ffmpeg espeak-ng git
-git clone <your-repo> && cd YouPI-Getway/bhashaflix-ai
-pip install -r requirements.txt          # pure-Python + numpy/PyAV wheels, arm64 fine
+pkg update
+pkg install python ffmpeg espeak git python-numpy   # NOTE: the package is `espeak`, not `espeak-ng`
+git clone -b arena/b2c2def4-youpi-getway https://github.com/AgainHeist/YouPI-Getway
+cd YouPI-Getway/bhashaflix-ai          # the app lives in this sub-folder
+pip install -r requirements-termux.txt # no PyAV / no imageio-ffmpeg: nothing to compile against libav
 python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000
 # then open http://localhost:8000 in the phone browser
 ```
 
-- `pkg install espeak-ng` is enough for voices: the TTS engine looks for the library in
-  `BFLIX_ESPEAK_LIB` → the pip wheel → `$PREFIX/lib/libespeak-ng.so` → common system paths, and for
-  data in `BFLIX_ESPEAK_DATA` → `$PREFIX/share/espeak-ng-data` → the usual shared dirs.
-- `pkg install ffmpeg` gives you a native arm64 ffmpeg *and* ffprobe (faster than the static
-  `imageio-ffmpeg` binary; either works).
+`bash scripts/termux_setup.sh` does all of the above in the right order and checks each step.
+
+- **The Termux package is `espeak`** (it *is* eSpeak NG 1.52) — `pkg install espeak-ng` fails with
+  *"Unable to locate package"*. It installs `$PREFIX/lib/libespeak-ng.so` and
+  `$PREFIX/share/espeak-ng-data`, both of which the app finds by itself; you can override with
+  `BFLIX_ESPEAK_LIB` / `BFLIX_ESPEAK_DATA`. The pip wheel (`espeakng-loader`) is only a fallback.
+- **PyAV is optional.** With `requirements-termux.txt` there is no `av` module at all: audio decoding
+  is piped through the `ffmpeg` binary (`-f f32le`), and probing uses the `ffprobe` that ships with
+  `pkg install ffmpeg`. Same numbers, no C build against Android.
+- `pkg install python-numpy` first: numpy compiles for hours on a phone, and Android wheels are not
+  available from PyPI (Termux is not `manylinux`). Same reason `pydantic-core` may need
+  `pkg install rust` — if pip still refuses, use the tunnel/preview route below and keep the phone
+  as the viewer.
+- What will **not** install comfortably: `torch`, XTTS-v2, Demucs, NLLB — phones don't have the RAM,
+  and the APK-less Termux build has no CUDA/ANE path. Without them the app still dubs: type or
+  import the dialogue (`input_mode=manual` or subtitle files), use eSpeak NG voices and stereo
+  centre suppression for the music bed. That is the honest free path, not a degraded demo.
+- Batch work (a full film) belongs on a laptop/Colab/GPU box; point the phone UI at it via Settings.
+
+### Exact errors people hit on Termux
+
+| What you see | Why | Fix |
+|---|---|---|
+| `E: Unable to locate package espeak-ng` | Termux ships eSpeak **NG** under the package name `espeak` | `pkg install espeak` |
+| `bash: cd: YouPI-Getway/bhashaflix-ai: No such file or directory` | You cloned the default branch (`main`), which does not contain the app yet | `git clone -b arena/b2c2def4-youpi-getway <repo>` or merge the open PR first, then `cd YouPI-Getway/bhashaflix-ai` |
+| `ERROR: Could not open requirements file: requirements.txt` | You are in the repo root; the app is one level down | `cd bhashaflix-ai` |
+| `ModuleNotFoundError: No module named 'backend'` | uvicorn was started outside `bhashaflix-ai/`, or the requirements never installed | `cd bhashaflix-ai && pip install -r requirements-termux.txt` |
+| `pip install numpy` builds forever / `pydantic-core` needs rust | Termux is not `manylinux`; no prebuilt wheels | `pkg install python-numpy rust`, then re-run the pip step |
 - What will **not** install comfortably: `torch`, XTTS-v2, Demucs, NLLB — phones don't have the RAM,
   and the APK-less Termux build has no CUDA/ANE path. Without them the app still dubs: type or
   import the dialogue (`input_mode=manual` or subtitle files), use eSpeak NG voices and stereo
@@ -302,7 +327,7 @@ docker run -p 8000:8000 -v bhashaflix-data:/data -e BFLIX_MAX_DURATION_SEC=300 b
 ## Tests
 
 ```bash
-make test        # 43 tests, ~20 s, no mocks
+make test        # 44 tests, ~26 s, no mocks
 ```
 
 The suite builds real media with FFmpeg and runs the real pipeline:
@@ -322,7 +347,7 @@ The suite builds real media with FFmpeg and runs the real pipeline:
 Numbers from a run on this machine (CPU only, no GPU, no AI models installed):
 
 ```
-43 passed in 18.81s
+44 passed in 26s
 ```
 
 ---

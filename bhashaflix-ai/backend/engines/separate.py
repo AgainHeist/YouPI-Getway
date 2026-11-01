@@ -120,7 +120,7 @@ class CenterSuppressionSeparator(BaseSeparator):
             import numpy  # noqa: F401
             import av  # noqa: F401
         except Exception:
-            return False, "needs numpy + av"
+            return False, "needs numpy + audio decoding (PyAV or system ffmpeg)"
         return True, "ready"
 
     def run(self, source_wav: Path, work_dir: Path, *, mono_source: bool = False) -> SeparationResult:

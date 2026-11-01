@@ -192,3 +192,33 @@ def test_resample_and_fade():
     faded = dsp.apply_fade(x, 1000, fade_ms=10)
     assert faded[0] == pytest.approx(0.0, abs=1e-6)
     assert faded[-1] == pytest.approx(0.0, abs=1e-6)
+
+
+def test_decode_falls_back_to_ffmpeg_when_pyav_is_missing(monkeypatch, tmp_path):
+    """Phones/Termux have no PyAV: decoding must then go through the ffmpeg pipe."""
+    import subprocess
+    import sys
+
+    from backend.config import ffmpeg_executable
+    from backend.engines import media
+
+    ffmpeg = ffmpeg_executable()
+    if not ffmpeg:
+        pytest.skip("ffmpeg not available")
+    wav = tmp_path / "tone.wav"
+    subprocess.run(
+        [
+            ffmpeg, "-hide_banner", "-nostdin", "-y", "-f", "lavfi",
+            "-i", "sine=frequency=440:sample_rate=48000:duration=1",
+            "-ac", "2", str(wav),
+        ],
+        capture_output=True,
+        check=True,
+    )
+    monkeypatch.setitem(sys.modules, "av", None)  # makes `import av` raise ImportError
+    samples, rate = media.decode_to_numpy(wav, channels=1, sample_rate=16000)
+    assert rate == 16000
+    assert samples.shape == (16000, 1)
+    assert 0.05 < float(np.abs(samples).max()) < 0.2  # the sine is at -18 dBFS
+    # and the probe still works without PyAV (ffprobe or `ffmpeg -i` parsing)
+    assert media.probe(wav).duration == pytest.approx(1.0, abs=0.1)

@@ -121,7 +121,7 @@ class SpectralDiarizer(BaseDiarizer):
             import numpy  # noqa: F401
             import av  # noqa: F401
         except Exception:
-            return False, "needs numpy + av (pip install numpy av)"
+            return False, "needs numpy + audio decoding (PyAV or system ffmpeg)"
         return True, "ready"
 
     def run(self, audio_path: Path, segments: list[dict]) -> DiarizationResult:

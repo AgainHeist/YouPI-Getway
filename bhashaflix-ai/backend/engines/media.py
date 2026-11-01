@@ -348,19 +348,25 @@ def extract_audio(
 
 
 def decode_to_numpy(path: Path, *, channels: int | None = None, sample_rate: int | None = None):
-    """Decode an audio file into float32 numpy arrays using PyAV.
+    """Decode an audio file into float32 numpy arrays.
 
     Returns (samples[frames, channels] as float32 in [-1, 1], sample_rate).
+
+    PyAV is used when it is installed; otherwise we pipe the file through the
+    FFmpeg binary (`-f f32le`).  The fallback matters on phones/Termux and slim
+    images where building PyAV is not practical but ffmpeg is a system package.
 
     Note: libswresample in some PyAV builds produces garbage when it is asked
     to change the channel layout of a stream, so we always resample *keeping*
     the native layout and do the mono/stereo conversion ourselves in numpy.
     """
-    import av  # type: ignore
-    import numpy as np
-
     target_channels = channels or 2
     target_rate = sample_rate or 48000
+    try:
+        import av  # type: ignore  # noqa: F401
+    except Exception:
+        return _decode_via_ffmpeg(path, target_channels, target_rate)
+    import numpy as np
     chunks: list[np.ndarray] = []
     with av.open(str(path)) as container:
         stream = container.streams.audio[0]
@@ -393,6 +399,39 @@ def decode_to_numpy(path: Path, *, channels: int | None = None, sample_rate: int
         else:
             data = data[:, :target_channels]
     return data, target_rate
+
+
+def _decode_via_ffmpeg(path: Path, channels: int, sample_rate: int):
+    """Decode with the ffmpeg binary when PyAV is unavailable (no wheel/compiler)."""
+    import numpy as np
+
+    exe = ffmpeg_executable()
+    if not exe:
+        raise MediaError(
+            "No audio decoder available: PyAV is not installed and FFmpeg was not found.",
+            code="DECODER_MISSING",
+            hint="Install ffmpeg (`pkg install ffmpeg` on Termux) or `pip install av`.",
+        )
+    cmd = [
+        exe, "-hide_banner", "-nostdin", "-v", "error",
+        "-i", str(path),
+        "-vn", "-sn", "-dn",
+        "-ac", str(channels), "-ar", str(sample_rate),
+        "-f", "f32le", "-acodec", "pcm_f32le", "pipe:1",
+    ]
+    proc = subprocess.run(cmd, capture_output=True, timeout=900)
+    if proc.returncode != 0:
+        raise MediaError(
+            "FFmpeg could not decode this audio stream.",
+            code="AUDIO_DECODE_FAILED",
+            hint=proc.stderr.decode("utf-8", "replace")[-600:],
+        )
+    data = np.frombuffer(proc.stdout, dtype="<f4")
+    usable = data.size - (data.size % channels)
+    data = data[:usable].reshape(-1, channels).astype(np.float32, copy=False)
+    if data.size == 0:
+        raise MediaError("Decoded audio was empty.", code="AUDIO_DECODE_FAILED")
+    return data, sample_rate
 
 
 def _frame_to_float(frame) -> "np.ndarray":
