@@ -1,4 +1,5 @@
 import { escapeHtml } from '../markdown.js';
+import { BRAND } from '../content.js';
 
 /**
  * Shared chrome for every public page.
@@ -6,11 +7,24 @@ import { escapeHtml } from '../markdown.js';
  * file loaded from `public/js/site.js`, which keeps the CSP at `script-src 'self'`.
  */
 
-export const SITE_NAME = 'YOUPI PG';
+const NAV = [
+  { href: '/why', label: 'Why YOUPI' },
+  { href: '/features', label: 'Features' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/docs', label: 'Docs' },
+  { href: '/faq', label: 'FAQ' }
+];
 
-function navLink(href, label, active) {
-  const isActive = active === href;
-  return `<a href="${escapeHtml(href)}"${isActive ? ' aria-current="page"' : ''}>${escapeHtml(label)}</a>`;
+function navLink(item, active) {
+  const isActive = active === item.href;
+  return `<a href="${escapeHtml(item.href)}"${isActive ? ' aria-current="page"' : ''}>${escapeHtml(item.label)}</a>`;
+}
+
+function footerColumn(title, links) {
+  return `<div>
+    <h4>${escapeHtml(title)}</h4>
+    ${links.map(link => `<a href="${escapeHtml(link.href)}">${escapeHtml(link.label)}</a>`).join('\n')}
+  </div>`;
 }
 
 /**
@@ -19,18 +33,18 @@ function navLink(href, label, active) {
  *   description?: string,
  *   body: string,
  *   active?: string,
- *   links: { admin: string, store: string, docs: string },
+ *   links: { admin: string, store: string, docs: string, help: string },
  *   brand?: string
  * }} options
  */
 export function renderLayout(options) {
   const {
     title,
-    description = 'Self-hosted, white-label UPI payment gateway with 0% gateway fees and direct-to-bank settlement.',
+    description = BRAND.description,
     body,
     active = '',
     links,
-    brand = SITE_NAME
+    brand = BRAND.name
   } = options;
 
   return `<!DOCTYPE html>
@@ -49,22 +63,23 @@ export function renderLayout(options) {
 <link rel="stylesheet" href="/css/site.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap">
     <a class="brand" href="/">
       <span class="brand-mark">YP</span>
-      <span>${escapeHtml(brand)}<small>Payments Infrastructure</small></span>
+      <span>${escapeHtml(brand)}<small>${escapeHtml(BRAND.tagline)}</small></span>
     </a>
     <nav class="nav-links" aria-label="Primary">
-      ${navLink('/#features', 'Features', active)}
-      ${navLink('/#how-it-works', 'How it works', active)}
-      ${navLink('/docs', 'Docs', active)}
-      ${navLink(links.store, 'Live demo', active)}
+      ${NAV.map(item => navLink(item, active)).join('\n      ')}
     </nav>
-    <a class="btn btn-primary btn-sm" href="${escapeHtml(links.admin)}" style="margin-left:auto">Merchant dashboard</a>
+    <div class="header-actions">
+      <a class="btn btn-ghost btn-sm" href="${escapeHtml(links.store)}">Live demo</a>
+      <a class="btn btn-primary btn-sm" href="${escapeHtml(links.admin)}">Get started</a>
+    </div>
   </div>
 </header>
-<main>
+<main id="main">
 ${body}
 </main>
 <footer class="site-footer">
@@ -73,31 +88,41 @@ ${body}
       <div>
         <a class="brand" href="/" style="margin-bottom:14px">
           <span class="brand-mark">YP</span>
-          <span>${escapeHtml(brand)}<small>Payments Infrastructure</small></span>
+          <span>${escapeHtml(brand)}<small>${escapeHtml(BRAND.tagline)}</small></span>
         </a>
         <p style="font-size:.88rem;max-width:34ch">Self-hosted UPI payment gateway. Your bank account, your brand, zero gateway fees.</p>
+        <p style="font-size:.8rem;margin-top:12px;color:#7b8dab">${escapeHtml(BRAND.origin)}</p>
       </div>
-      <div>
-        <h4>Product</h4>
-        <a href="/#features">Features</a>
-        <a href="/#how-it-works">How it works</a>
-        <a href="/#integrate">Integration</a>
-        <a href="${escapeHtml(links.store)}">Live demo store</a>
-      </div>
-      <div>
-        <h4>Developers</h4>
-        <a href="/docs">Documentation</a>
-        <a href="/docs/DEVELOPER_INTEGRATION">API &amp; webhooks</a>
-        <a href="/docs/CONFIGURATION">Configuration</a>
-        <a href="/docs/DEPLOYMENT">Deployment</a>
-      </div>
-      <div>
-        <h4>Operations</h4>
-        <a href="${escapeHtml(links.admin)}">Merchant dashboard</a>
-        <a href="/docs/OBSERVERS_SETUP">Payment observers</a>
-        <a href="/docs/OPERATIONS_TROUBLESHOOTING">Troubleshooting</a>
-        <a href="/health">Service health</a>
-      </div>
+      ${footerColumn('Product', [
+        { href: '/why', label: 'Why YOUPI' },
+        { href: '/features', label: 'Features' },
+        { href: '/pricing', label: 'Pricing' },
+        { href: '/faq', label: 'FAQ' },
+        { href: links.store, label: 'Live demo store' }
+      ])}
+      ${footerColumn('Developers', [
+        { href: '/docs', label: 'Documentation' },
+        { href: '/docs/DEVELOPER_INTEGRATION', label: 'API & webhooks' },
+        { href: '/docs/CONFIGURATION', label: 'Configuration' },
+        { href: '/docs/DEPLOYMENT', label: 'Deployment' },
+        { href: '/status', label: 'Service status' }
+      ])}
+      ${footerColumn('Company', [
+        { href: '/about', label: 'About' },
+        { href: '/contact', label: 'Contact' },
+        { href: links.admin, label: 'Merchant dashboard' },
+        { href: '/legal/terms', label: 'Terms of use' },
+        { href: '/legal/privacy', label: 'Privacy' }
+      ])}
+    </div>
+    <div class="footer-base">
+      <span>© ${new Date().getFullYear()} ${escapeHtml(brand)}. Software provided for research and experimentation.</span>
+      <span class="footer-legal">
+        <a href="/legal/terms">Terms</a>
+        <a href="/legal/privacy">Privacy</a>
+        <a href="/legal/refund">Refunds</a>
+        <a href="/legal/disclaimer">Disclaimer</a>
+      </span>
     </div>
     <p class="footer-note">
       <strong style="color:#cbd8ee">Research project — experimental use only.</strong>

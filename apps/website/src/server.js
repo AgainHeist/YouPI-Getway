@@ -3,8 +3,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { extractDocMeta } from './markdown.js';
+import { STATUS_SERVICES } from './content.js';
 import { renderLanding } from './views/landing.js';
 import { renderDocsIndex, renderDoc, renderNotFound } from './views/docs.js';
+import {
+  renderWhy,
+  renderFeatures,
+  renderPricing,
+  renderFaq,
+  renderAbout,
+  renderContact,
+  renderStatus,
+  renderLegal,
+  LEGAL_SLUGS
+} from './views/pages.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,7 +50,8 @@ export class WebsiteServer {
     this.links = {
       admin: options.links?.admin || process.env.BASE_ADMIN_URL || 'http://localhost:6001',
       store: options.links?.store || process.env.BASE_DEMO_STORE_URL || 'http://localhost:5000',
-      help: options.links?.help || process.env.BASE_HELP_URL || 'http://localhost:3000'
+      help: options.links?.help || process.env.BASE_HELP_URL || 'http://localhost:3000',
+      checkout: options.links?.checkout || process.env.BASE_CHECKOUT_URL || 'http://localhost:7000'
     };
     this.docCache = null;
   }
@@ -177,6 +190,50 @@ export class WebsiteServer {
     res.end(JSON.stringify(payload));
   }
 
+
+  /**
+   * Probes one service for the public status page. Each probe is independent and
+   * never throws, so one dead service cannot blank out the whole table.
+   */
+  async probeService(service) {
+    const target = service.probe === 'api'
+      ? `${this.paymentApiUrl}/health`
+      : service.probe === 'link'
+        ? `${this.links[service.urlKey]}/health`
+        : null;
+
+    if (!target) return { id: service.id, name: service.name, state: 'up', latencyMs: null };
+
+    const startedAt = Date.now();
+    try {
+      const res = await fetch(target, { signal: AbortSignal.timeout(this.healthTimeoutMs) });
+      return {
+        id: service.id,
+        name: service.name,
+        state: res.ok ? 'up' : 'down',
+        latencyMs: Date.now() - startedAt
+      };
+    } catch {
+      return { id: service.id, name: service.name, state: 'down', latencyMs: null };
+    }
+  }
+
+  async probeAll(services) {
+    return Promise.all(services.map(service => this.probeService(service)));
+  }
+
+  /** Static sitemap for crawlers; every page is public and has no query parameters. */
+  buildSitemap() {
+    const paths = [
+      '/', '/why', '/features', '/pricing', '/faq', '/about', '/contact', '/status', '/docs',
+      ...LEGAL_SLUGS.map(slug => `/legal/${slug}`),
+      ...this.listDocs().map(doc => `/docs/${doc.slug}`)
+    ];
+    const base = (process.env.SITE_PUBLIC_URL || '').replace(/\/+$/, '');
+    const urls = paths.map(p => `  <url><loc>${base}${p}</loc><changefreq>weekly</changefreq></url>`).join('\n');
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+  }
+
   createServer() {
     return http.createServer(async (req, res) => {
       let pathname = '/';
@@ -215,6 +272,42 @@ export class WebsiteServer {
           const [status, stats] = await Promise.all([this.getGatewayStatus(), this.getPublicStats()]);
           this.sendHtml(res, 200, renderLanding({ status, stats, docs, links: this.links }));
           return;
+        }
+
+        if (pathname === '/sitemap.xml') {
+          res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8' });
+          res.end(this.buildSitemap());
+          return;
+        }
+
+        // Marketing pages
+        const simplePages = {
+          '/why': () => renderWhy({ links: this.links }),
+          '/features': () => renderFeatures({ links: this.links }),
+          '/pricing': () => renderPricing({ links: this.links }),
+          '/faq': () => renderFaq({ links: this.links }),
+          '/about': () => renderAbout({ links: this.links }),
+          '/contact': () => renderContact({ links: this.links })
+        };
+        const pagePath = pathname.replace(/\/+$/, '') || '/';
+        if (simplePages[pagePath]) {
+          this.sendHtml(res, 200, simplePages[pagePath]());
+          return;
+        }
+
+        if (pagePath === '/status') {
+          const services = await this.probeAll(STATUS_SERVICES);
+          this.sendHtml(res, 200, renderStatus({ links: this.links, services, gateway: services.find(s => s.id === 'payment-api') }));
+          return;
+        }
+
+        const legalMatch = pagePath.match(/^\/legal\/([a-z-]+)$/);
+        if (legalMatch) {
+          const html = LEGAL_SLUGS.includes(legalMatch[1]) ? renderLegal({ links: this.links, slug: legalMatch[1] }) : null;
+          if (html) {
+            this.sendHtml(res, 200, html);
+            return;
+          }
         }
 
         if (pathname === '/docs' || pathname === '/docs/') {

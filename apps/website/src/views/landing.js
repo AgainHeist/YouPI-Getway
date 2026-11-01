@@ -1,54 +1,6 @@
 import { escapeHtml } from '../markdown.js';
 import { renderLayout } from './layout.js';
-
-const FEATURES = [
-  {
-    icon: '₹0',
-    title: 'Zero gateway fees',
-    body: 'No 2–3% cut and no 18% GST on the fee. The money lands straight in your own bank account, so the full amount is yours.'
-  },
-  {
-    icon: '⚡',
-    title: 'Direct settlement',
-    body: 'The customer pays your VPA. There is no pooled nodal account and no T+2 holdback to wait out before you can use the money.'
-  },
-  {
-    icon: '💬',
-    title: 'WhatsApp OTP gate',
-    body: 'A 6-digit code is delivered through WhatsApp before the timer starts, so spoofed phone numbers cannot occupy a payment slot.'
-  },
-  {
-    icon: '🔍',
-    title: 'Bank observation mesh',
-    body: 'Android SMS, Gmail alerts and the SMS observer all feed one normaliser that matches credits by amount, account and time window.'
-  },
-  {
-    icon: '🎟️',
-    title: 'FIFO single-slot queue',
-    body: 'One active payment per receiving account keeps amount-only matching deterministic. Waiting customers get a live queue position.'
-  },
-  {
-    icon: '🎨',
-    title: '100% white label',
-    body: 'Logo, colours, domain, support details and the checkout copy are all yours. No "powered by" badge anywhere in the flow.'
-  }
-];
-
-const STEPS = [
-  { title: 'Create the session', body: 'Your site calls POST /api/v1/payments with the amount and order id, and gets back a checkout URL.' },
-  { title: 'Authenticate', body: 'The customer verifies their mobile over WhatsApp OTP, so the gateway knows who is paying before a slot is held.' },
-  { title: 'Pay by UPI', body: 'A vector QR plus one-tap intents for GPay, PhonePe, Paytm and CRED, with a 5-minute server-authoritative timer.' },
-  { title: 'Detect and settle', body: 'A matching bank credit inside the verification window flips the session to SUCCESS and fires a signed webhook.' }
-];
-
-const COMPARISON = [
-  ['Transaction fee', '2–3% + 18% GST', '0% forever'],
-  ['Settlement', 'T+2 to T+3 business days', 'Direct to your bank'],
-  ['Branding', 'Provider badge mandatory', 'Fully white label'],
-  ['Payment proof', 'Provider webhook only', 'SMS + Gmail + Android observers'],
-  ['Offline counter', 'Extra POS hardware', 'Built-in cash / card till'],
-  ['Data ownership', 'Vendor cloud', 'Your own SQLite database']
-];
+import { BRAND, FEATURES, STEPS, COMPARISON, FAQ, PRICING, TRUST_NOTES } from '../content.js';
 
 function statusPill(status) {
   const up = status?.state === 'up';
@@ -56,29 +8,6 @@ function statusPill(status) {
     <span class="dot${up ? '' : ' is-down'}"></span>
     ${up ? 'Gateway online' : 'Gateway unreachable'}${status?.latencyMs != null ? ` · ${status.latencyMs} ms` : ''}
   </span>`;
-}
-
-function featureCard(feature) {
-  return `<article class="card">
-    <div class="card-icon">${escapeHtml(feature.icon)}</div>
-    <h3>${escapeHtml(feature.title)}</h3>
-    <p>${escapeHtml(feature.body)}</p>
-  </article>`;
-}
-
-function stepCard(step) {
-  return `<article class="step">
-    <h3>${escapeHtml(step.title)}</h3>
-    <p>${escapeHtml(step.body)}</p>
-  </article>`;
-}
-
-function comparisonRow([label, them, us]) {
-  return `<tr>
-    <td>${escapeHtml(label)}</td>
-    <td class="cross">${escapeHtml(them)}</td>
-    <td class="youpi"><span class="tick">✓</span> ${escapeHtml(us)}</td>
-  </tr>`;
 }
 
 const CODE_SAMPLE = `<span class="tok-com">&lt;!-- 1. drop the SDK on any page --&gt;</span>
@@ -92,19 +21,20 @@ const CODE_SAMPLE = `<span class="tok-com">&lt;!-- 1. drop the SDK on any page -
   Buy now
 &lt;/button&gt;`;
 
-function docCards(docs) {
-  return docs.slice(0, 6).map(doc => `<a class="doc-card" href="/docs/${encodeURIComponent(doc.slug)}">
-    <strong>${escapeHtml(doc.title)}</strong>
-    <span>${escapeHtml(doc.summary || 'Read the guide')}</span>
-  </a>`).join('\n');
+function featureCard(feature) {
+  return `<article class="card">
+    <div class="card-icon">${escapeHtml(feature.icon)}</div>
+    <h3>${escapeHtml(feature.title)}</h3>
+    <p>${escapeHtml(feature.body)}</p>
+  </article>`;
 }
 
 /**
  * @param {{
  *   status: { state: 'up'|'down', latencyMs?: number },
+ *   stats: { payments: number, merchants: number },
  *   docs: Array<{ slug, title, summary }>,
- *   links: { admin: string, store: string, help: string },
- *   stats: { payments: number, merchants: number }
+ *   links: { admin: string, store: string, help: string }
  * }} ctx
  */
 export function renderLanding(ctx) {
@@ -116,11 +46,7 @@ export function renderLanding(ctx) {
     <div>
       ${statusPill(status)}
       <h1>Accept UPI payments. <span class="accent">Keep every rupee.</span></h1>
-      <p class="lede">
-        A self-hosted payment gateway that settles straight into your own bank account.
-        WhatsApp OTP authentication, vector QR checkout and a three-channel bank observation
-        engine — running on your server, under your brand.
-      </p>
+      <p class="lede">${escapeHtml(BRAND.description)}</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="${escapeHtml(links.admin)}">Open merchant dashboard</a>
         <a class="btn btn-ghost" href="${escapeHtml(links.store)}">Try the live demo →</a>
@@ -163,8 +89,9 @@ export function renderLanding(ctx) {
       <p>Same checkout quality as a mainstream gateway, without the fee, the holdback or the vendor badge on your page.</p>
     </div>
     <div class="cards">
-      ${FEATURES.map(featureCard).join('\n')}
+      ${FEATURES.slice(0, 6).map(featureCard).join('\n')}
     </div>
+    <p style="margin-top:24px"><a class="btn btn-outline" href="/features">See all features →</a></p>
   </div>
 </section>
 
@@ -176,7 +103,10 @@ export function renderLanding(ctx) {
       <p>Every step is server-authoritative and auditable — the browser never gets to decide that a payment succeeded.</p>
     </div>
     <div class="steps">
-      ${STEPS.map(stepCard).join('\n')}
+      ${STEPS.map(step => `<article class="step">
+        <h3>${escapeHtml(step.title)}</h3>
+        <p>${escapeHtml(step.body)}</p>
+      </article>`).join('\n')}
     </div>
     <div class="status-strip" style="margin-top:34px">
       <div>
@@ -186,6 +116,7 @@ export function renderLanding(ctx) {
       <div class="status-list">
         <div class="status-item"><span class="dot${status?.state === 'up' ? '' : ' is-down'}"></span> Payment API ${status?.state === 'up' ? 'operational' : 'unreachable'}</div>
         <div class="status-item"><span class="dot${status?.state === 'up' ? '' : ' is-down'}"></span> ${status?.latencyMs != null ? `${status.latencyMs} ms response` : 'No response'}</div>
+        <div class="status-item"><a href="/status" style="color:#8ec5ff">Full status page →</a></div>
       </div>
     </div>
   </div>
@@ -197,18 +128,43 @@ export function renderLanding(ctx) {
       <span class="eyebrow">Comparison</span>
       <h2>What changes when you own the rail.</h2>
     </div>
-    <table class="compare">
-      <thead>
-        <tr><th>Metric</th><th>Typical aggregator</th><th class="youpi-col">YOUPI PG</th></tr>
-      </thead>
-      <tbody>
-        ${COMPARISON.map(comparisonRow).join('\n')}
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="compare">
+        <thead>
+          <tr><th>Metric</th><th>Typical aggregator</th><th class="youpi-col">${escapeHtml(BRAND.name)}</th></tr>
+        </thead>
+        <tbody>
+          ${COMPARISON.slice(0, 6).map(([label, them, us]) => `<tr>
+            <td>${escapeHtml(label)}</td>
+            <td class="cross">${escapeHtml(them)}</td>
+            <td class="youpi"><span class="tick">✓</span> ${escapeHtml(us)}</td>
+          </tr>`).join('\n')}
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:20px"><a class="btn btn-outline" href="/why">Read the full comparison →</a></p>
   </div>
 </section>
 
-<section id="integrate">
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Pricing</span>
+      <h2>${escapeHtml(PRICING.headline)}</h2>
+      <p>${escapeHtml(PRICING.sub)}</p>
+    </div>
+    <div class="price-grid compact">
+      ${PRICING.rows.map(row => `<article class="price-card">
+        <span class="price-item">${escapeHtml(row.item)}</span>
+        <strong>${escapeHtml(row.amount)}</strong>
+        <span class="price-note">${escapeHtml(row.note)}</span>
+      </article>`).join('\n')}
+    </div>
+    <p style="margin-top:20px"><a class="btn btn-outline" href="/pricing">See the real running costs →</a></p>
+  </div>
+</section>
+
+<section id="integrate" class="section-alt">
   <div class="wrap">
     <div class="section-head">
       <span class="eyebrow">Integration</span>
@@ -222,10 +178,29 @@ export function renderLanding(ctx) {
       </div>
       <pre><code id="integration-snippet">${CODE_SAMPLE}</code></pre>
     </div>
+    <ul class="check-list" style="margin-top:22px">
+      ${TRUST_NOTES.map(note => `<li>${escapeHtml(note)}</li>`).join('\n')}
+    </ul>
     <p style="margin-top:16px;color:var(--muted);font-size:.9rem">
       React, Vue, Next.js or Nuxt? Use the programmatic API — <a href="/docs/DEVELOPER_INTEGRATION">see the developer guide</a>.
       Server-to-server confirmation should always verify the <code>X-Gateway-Signature</code> HMAC over the raw webhook body.
     </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">FAQ</span>
+      <h2>Before you ask.</h2>
+    </div>
+    <div class="faq-wrap">
+      ${FAQ.slice(0, 5).map(item => `<details class="faq-item">
+        <summary>${escapeHtml(item.q)}</summary>
+        <p>${escapeHtml(item.a)}</p>
+      </details>`).join('\n')}
+    </div>
+    <p style="margin-top:20px"><a class="btn btn-outline" href="/faq">All questions →</a></p>
   </div>
 </section>
 
@@ -237,14 +212,32 @@ export function renderLanding(ctx) {
       <p>Every guide in the repository, rendered for reading.</p>
     </div>
     <div class="doc-cards">
-      ${docCards(docs)}
+      ${docs.slice(0, 6).map(doc => `<a class="doc-card" href="/docs/${encodeURIComponent(doc.slug)}">
+        <strong>${escapeHtml(doc.title)}</strong>
+        <span>${escapeHtml(doc.summary || 'Read the guide')}</span>
+      </a>`).join('\n')}
     </div>
     <p style="margin-top:22px"><a class="btn btn-outline" href="/docs">Browse all documentation →</a></p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="cta-band">
+      <div>
+        <h2>Ready to see it working?</h2>
+        <p>Open the demo store, run a test payment, then wire the same SDK into your own site.</p>
+      </div>
+      <div class="hero-actions" style="margin:0">
+        <a class="btn btn-primary" href="${escapeHtml(links.store)}">Try the live demo</a>
+        <a class="btn btn-ghost" href="/why">Why self-hosted?</a>
+      </div>
+    </div>
   </div>
 </section>`;
 
   return renderLayout({
-    title: 'YOUPI PG — Self-hosted UPI payment gateway with 0% fees',
+    title: `${BRAND.name} — Self-hosted UPI payment gateway with 0% fees`,
     body,
     active: '/',
     links

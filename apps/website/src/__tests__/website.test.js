@@ -112,7 +112,60 @@ test('Public website & documentation portal', async (t) => {
     assert.match(js.headers['content-type'], /javascript/);
   });
 
-  await t.test('10. robots.txt is served', async () => {
+  await t.test('10. Every marketing page renders with its own content', async () => {
+    const pages = [
+      ['/why', /Why YOUPI|payment gateway should not own/],
+      ['/features', /Everything the checkout needs/],
+      ['/pricing', /Zero gateway commission/],
+      ['/faq', /The questions people actually ask/],
+      ['/about', /Built in the open/],
+      ['/contact', /Talk to the people who build it/]
+    ];
+    for (const [pathname, pattern] of pages) {
+      const res = await get(pathname);
+      assert.equal(res.status, 200, `${pathname} should render`);
+      assert.match(res.body, pattern, `${pathname} should contain its headline`);
+      assert.match(res.body, /<footer class="site-footer">/, `${pathname} should keep the shared chrome`);
+    }
+  });
+
+  await t.test('11. Navigation links to every top-level page', async () => {
+    const res = await get('/');
+    for (const href of ['/why', '/features', '/pricing', '/docs', '/faq', '/about', '/contact', '/status']) {
+      assert.match(res.body, new RegExp(`href="${href}"`), `header/footer should link ${href}`);
+    }
+  });
+
+  await t.test('12. Status page probes services and degrades to "Unreachable"', async () => {
+    const res = await get('/status');
+    assert.equal(res.status, 200);
+    assert.match(res.body, /Service status|systems operational|not responding/i);
+    assert.match(res.body, /Unreachable/);
+  });
+
+  await t.test('13. All four legal pages render and carry the template warning', async () => {
+    for (const slug of ['terms', 'privacy', 'refund', 'disclaimer']) {
+      const res = await get(`/legal/${slug}`);
+      assert.equal(res.status, 200, `/legal/${slug} should render`);
+      assert.match(res.body, /Template document/, `/legal/${slug} must keep the legal warning`);
+    }
+  });
+
+  await t.test('14. Unknown legal slugs 404 instead of throwing', async () => {
+    const res = await get('/legal/not-a-real-policy');
+    assert.equal(res.status, 404);
+  });
+
+  await t.test('15. Sitemap lists every page', async () => {
+    const res = await get('/sitemap.xml');
+    assert.equal(res.status, 200);
+    assert.match(res.headers['content-type'], /application\/xml/);
+    for (const pathname of ['/why', '/pricing', '/faq', '/legal/privacy', '/docs/CONFIGURATION']) {
+      assert.match(res.body, new RegExp(`<loc>[^<]*${pathname}</loc>`), `sitemap should include ${pathname}`);
+    }
+  });
+
+  await t.test('16. robots.txt is served', async () => {
     const res = await get('/robots.txt');
     assert.equal(res.status, 200);
     assert.match(res.body, /Disallow: \/health/);
