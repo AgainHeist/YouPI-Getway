@@ -28,6 +28,7 @@ Original (English)                    Result (Hindi dub)
 - [API](#api)
 - [Interface](#interface)
 - [Models, licences and honest limits](#models-licences-and-honest-limits)
+- [Run it on your phone (Termux) and reach it from a phone](#run-it-on-your-phone-termux-and-reach-it-from-a-phone)
 - [Deployment on a ₹0 budget](#deployment-on-a-₹0-budget)
 - [Tests](#tests)
 - [Project layout](#project-layout)
@@ -116,6 +117,16 @@ separation          : center-suppression (medium)
 speakers            : ['SPEAKER_01:espeak:hi+f3']
 warning             : Centre extraction … music mixed in mono can be affected.
 ```
+
+### Seed two finished projects (for screenshots / a first look)
+
+```bash
+make seed        # = python scripts/seed_demo_library.py   (server must be running)
+```
+
+It creates and fully renders two jobs — one subtitles-mode film and one two-speaker manual-mode
+film with a male and a female voice — then prints the library. Useful when you want the dashboard,
+player and download pages to have something real in them on a fresh install.
 
 ---
 
@@ -227,6 +238,47 @@ See [`docs/HONEST_LIMITS.md`](docs/HONEST_LIMITS.md) for the full list and
 
 ---
 
+## Run it on your phone (Termux) and reach it from a phone
+
+Two different questions, two different answers:
+
+**"Can I open the website from my phone?"** Yes, but not at `127.0.0.1` — that address means *the
+device you are holding*. Use one of:
+
+| Situation | URL to open on the phone |
+|---|---|
+| Server on your laptop, same Wi-Fi | `http://<laptop-lan-ip>:8000` (e.g. `http://192.168.1.7:8000`) |
+| Server in a cloud sandbox / VPS | the public preview URL of that host, e.g. `https://8000-<sandbox>.e2b.app` |
+| No public URL at all | `cloudflared tunnel --url http://localhost:8000` next to uvicorn, open the printed `https://…trycloudflare.com` |
+| Server running *inside* Termux | `http://localhost:8000` — now localhost really is the phone |
+
+The server already binds `0.0.0.0`, so any device on the network can connect; a firewall or a
+platform proxy is the only thing that could still block it. Because the UI keeps its backend URL in
+`localStorage` (Settings → Backend URL), a phone can also point at a laptop elsewhere.
+
+**"Can the whole app run inside Termux?"** Yes for the free pipeline, no for the big models:
+
+```bash
+pkg update && pkg install python ffmpeg espeak-ng git
+git clone <your-repo> && cd YouPI-Getway/bhashaflix-ai
+pip install -r requirements.txt          # pure-Python + numpy/PyAV wheels, arm64 fine
+python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000
+# then open http://localhost:8000 in the phone browser
+```
+
+- `pkg install espeak-ng` is enough for voices: the TTS engine looks for the library in
+  `BFLIX_ESPEAK_LIB` → the pip wheel → `$PREFIX/lib/libespeak-ng.so` → common system paths, and for
+  data in `BFLIX_ESPEAK_DATA` → `$PREFIX/share/espeak-ng-data` → the usual shared dirs.
+- `pkg install ffmpeg` gives you a native arm64 ffmpeg *and* ffprobe (faster than the static
+  `imageio-ffmpeg` binary; either works).
+- What will **not** install comfortably: `torch`, XTTS-v2, Demucs, NLLB — phones don't have the RAM,
+  and the APK-less Termux build has no CUDA/ANE path. Without them the app still dubs: type or
+  import the dialogue (`input_mode=manual` or subtitle files), use eSpeak NG voices and stereo
+  centre suppression for the music bed. That is the honest free path, not a degraded demo.
+- Batch work (a full film) belongs on a laptop/Colab/GPU box; point the phone UI at it via Settings.
+
+---
+
 ## Deployment on a ₹0 budget
 
 Three supported shapes (details in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)):
@@ -329,6 +381,9 @@ bhashaflix-ai/
 | Old voice still audible | Source audio is mono, or separation fell back to ducking — the warning says which. |
 | `video fingerprint mismatch` | Should be impossible with `-c:v copy`; treat it as a bug and do not publish the file. |
 | Player shows "file missing" | The project expired (retention) or was deleted. |
+| `TTS_UNAVAILABLE: libespeak-ng was not found` | `pip install espeakng-loader`, or install espeak-ng system-wide and set `BFLIX_ESPEAK_LIB` / `BFLIX_ESPEAK_DATA`. |
+| Phone can't open the site | You are probably using `localhost`/`127.0.0.1` on the phone — use the host's LAN IP or its public preview URL instead. |
+| Empty dashboard after a fresh install | Expected; run `make seed` (or `make demo`) against the running server. |
 
 ---
 

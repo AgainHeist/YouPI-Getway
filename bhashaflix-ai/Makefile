@@ -1,4 +1,4 @@
-.PHONY: help install install-ai run dev test demo docker clean storage
+.PHONY: help install install-ai run dev test demo seed docker clean storage
 
 PY ?= python3
 
@@ -9,6 +9,7 @@ help:
 	@echo "  make run          start the server on 0.0.0.0:8000"
 	@echo "  make test         run the full real test suite"
 	@echo "  make demo         dub a generated sample clip end to end"
+	@echo "  make seed         fill a running server with two finished demo projects"
 	@echo "  make docker       build the container image"
 	@echo "  make clean        remove generated storage (irreversible)"
 
@@ -29,6 +30,9 @@ test:
 
 demo:
 	$(PY) scripts/demo_e2e.py
+
+seed:
+	$(PY) scripts/seed_demo_library.py
 
 docker:
 	docker build -t bhashaflix-ai .

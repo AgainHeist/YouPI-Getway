@@ -54,6 +54,65 @@ class Voice:
         }
 
 
+def locate_espeak() -> tuple[str | None, str | None]:
+    """Find libespeak-ng + its data directory.
+
+    Order: explicit env vars -> the pip wheel (espeakng-loader) -> a system
+    install.  The system path is what makes Termux (`pkg install espeak-ng`)
+    and slim Docker images work without the wheel.
+    """
+    import ctypes.util
+    from shutil import which
+
+    lib_candidates: list[str] = []
+    data_candidates: list[str] = []
+    if os.environ.get("BFLIX_ESPEAK_LIB"):
+        lib_candidates.append(os.environ["BFLIX_ESPEAK_LIB"])
+    if os.environ.get("BFLIX_ESPEAK_DATA"):
+        data_candidates.append(os.environ["BFLIX_ESPEAK_DATA"])
+    try:
+        import espeakng_loader  # type: ignore
+
+        lib_candidates.append(str(espeakng_loader.get_library_path()))
+        data_candidates.append(str(espeakng_loader.get_data_path()))
+    except Exception:
+        pass
+    found = ctypes.util.find_library("espeak-ng") or ctypes.util.find_library("espeak")
+    if found:
+        lib_candidates.append(found)
+    prefix = os.environ.get("PREFIX", "")  # Termux sets PREFIX=/data/data/com.termux/files/usr
+    for base in (
+        "/data/data/com.termux/files/usr/lib",
+        "/usr/lib/x86_64-linux-gnu",
+        "/usr/lib/aarch64-linux-gnu",
+        "/usr/lib/arm-linux-gnueabihf",
+        "/usr/lib64",
+        "/usr/lib",
+        "/usr/local/lib",
+        "/opt/homebrew/lib",
+    ):
+        lib_candidates.append(f"{base}/libespeak-ng.so")
+        lib_candidates.append(f"{base}/libespeak-ng.so.1")
+        lib_candidates.append(f"{base}/libespeak-ng.dylib")
+        data_candidates.append(f"{base}/espeak-ng-data")
+    for base in (
+        "/data/data/com.termux/files/usr/share",
+        "/usr/share",
+        "/usr/local/share",
+        "/opt/homebrew/share",
+    ):
+        data_candidates.append(f"{base}/espeak-ng-data")
+    if prefix:
+        lib_candidates.insert(0, f"{prefix}/lib/libespeak-ng.so")
+        data_candidates.insert(0, f"{prefix}/share/espeak-ng-data")
+    lib_path = next((c for c in lib_candidates if c and Path(c).exists()), None)
+    data_path = next((c for c in data_candidates if c and Path(c).is_dir()), None)
+    if lib_path is None and which("espeak-ng"):
+        # binary exists but we cannot dlopen it; the caller reports the hint
+        return None, data_path
+    return lib_path, data_path
+
+
 class BaseTTS:
     name = "base"
     quality = "good"
@@ -90,22 +149,29 @@ class EspeakTTS(BaseTTS):
 
     @classmethod
     def dependencies_ok(cls) -> tuple[bool, str]:
-        try:
-            import espeakng_loader  # noqa: F401
-        except Exception:
-            return False, "pip install espeakng-loader (bundles libespeak-ng + voices)"
-        return True, "ready"
+        lib_path, _data = locate_espeak()
+        if lib_path:
+            return True, "ready"
+        return False, "pip install espeakng-loader, or install espeak-ng system-wide (set BFLIX_ESPEAK_LIB)"
 
     @classmethod
     def _load(cls):
         if cls._lib is not None:
             return cls._lib
-        import espeakng_loader
+        lib_path, data_path = locate_espeak()
+        if not lib_path:
+            raise TTSError(
+                "TTS_UNAVAILABLE",
+                "libespeak-ng was not found on this machine.",
+                "Install espeak-ng (apt/pacman/pkg install espeak-ng) or `pip install espeakng-loader`, "
+                "then optionally set BFLIX_ESPEAK_LIB / BFLIX_ESPEAK_DATA.",
+            )
 
-        lib = ctypes.CDLL(str(espeakng_loader.get_library_path()))
+        lib = ctypes.CDLL(str(lib_path))
         lib.espeak_Initialize.restype = ctypes.c_int
         lib.espeak_Initialize.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
-        cls._rate = lib.espeak_Initialize(2, 0, str(espeakng_loader.get_data_path()).encode(), 0)
+        data_arg = str(data_path).encode() if data_path else None
+        cls._rate = lib.espeak_Initialize(2, 0, data_arg, 0)
         cb_type = ctypes.CFUNCTYPE(
             ctypes.c_int, ctypes.POINTER(ctypes.c_short), ctypes.c_int, ctypes.c_void_p
         )
