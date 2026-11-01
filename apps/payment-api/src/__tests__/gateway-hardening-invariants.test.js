@@ -762,5 +762,49 @@ describe('Gateway Hardening & Invariant Protection Test Suite (#23, #25, #26, #2
       process.env.NODE_ENV = prevEnv;
     }
   });
-});
 
+  test('CORS preflight advertises every custom header the gateway reads', async () => {
+    const requested = [
+      'content-type',
+      'authorization',
+      'idempotency-key',
+      'x-device-id',
+      'x-device-token',
+      'x-device-signature',
+      'x-device-payload',
+      'x-timestamp',
+      'x-signature',
+      'x-merchant-id',
+      'x-merchant-key',
+      'x-customer-token',
+      'x-customer-session-token',
+      'x-order-token',
+      'x-sender'
+    ];
+
+    const res = await new Promise((resolve, reject) => {
+      const req = http.request(new URL('/api/v1/payments', baseUrl), {
+        method: 'OPTIONS',
+        headers: {
+          Origin: 'https://merchant.example',
+          'Access-Control-Request-Method': 'POST',
+          'Access-Control-Request-Headers': requested.join(',')
+        }
+      }, (response) => {
+        response.resume();
+        response.on('end', () => resolve(response));
+      });
+      req.on('error', reject);
+      req.end();
+    });
+
+    assert.equal(res.statusCode, 204);
+    const allowed = String(res.headers['access-control-allow-headers'] || '')
+      .split(',')
+      .map(h => h.trim().toLowerCase())
+      .filter(Boolean);
+    for (const header of requested) {
+      assert.ok(allowed.includes(header), `preflight must allow ${header} (got: ${allowed.join(', ')})`);
+    }
+  });
+});

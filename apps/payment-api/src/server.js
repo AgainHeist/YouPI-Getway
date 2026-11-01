@@ -9,6 +9,34 @@ const BASE_SECURITY_HEADERS = Object.freeze({
 });
 
 /**
+ * Every non-simple request header the gateway actually reads from a browser caller.
+ *
+ * A browser sends this list in `Access-Control-Request-Headers` on the preflight and then
+ * compares it against `Access-Control-Allow-Headers`: any header missing from the response
+ * makes the whole cross-origin fetch fail. The merchant-side modal SDK
+ * (`youpi-checkout.js`) posts `X-Merchant-Id` from the storefront origin and the checkout
+ * page forwards the customer/device headers, so all of them must be advertised here.
+ * Keep this in sync with the `req.headers[...]` reads in the routes.
+ */
+const ALLOWED_REQUEST_HEADERS = Object.freeze([
+  'Content-Type',
+  'Authorization',
+  'Idempotency-Key',
+  'X-Device-Id',
+  'X-Device-Token',
+  'X-Device-Signature',
+  'X-Device-Payload',
+  'X-Timestamp',
+  'X-Signature',
+  'X-Merchant-Id',
+  'X-Merchant-Key',
+  'X-Customer-Token',
+  'X-Customer-Session-Token',
+  'X-Order-Token',
+  'X-Sender'
+].join(', '));
+
+/**
  * Lightweight, high-performance HTTP router and server with native SSE and CORS.
  */
 export class HttpServer {
@@ -134,7 +162,7 @@ export class HttpServer {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Idempotency-Key, X-Device-Id, X-Timestamp, X-Signature',
+      'Access-Control-Allow-Headers': ALLOWED_REQUEST_HEADERS,
       ...BASE_SECURITY_HEADERS
     });
     res.end(jsonStr);
@@ -182,7 +210,7 @@ export class HttpServer {
         res.writeHead(204, {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Idempotency-Key, X-Device-Id, X-Timestamp, X-Signature',
+          'Access-Control-Allow-Headers': ALLOWED_REQUEST_HEADERS,
           ...BASE_SECURITY_HEADERS
         });
         res.end();

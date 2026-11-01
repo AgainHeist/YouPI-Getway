@@ -42,7 +42,7 @@
 [![WhatsApp Berry Auth](https://img.shields.io/badge/Auth-WhatsApp%20OTP-25d366?style=for-the-badge&logo=whatsapp&logoColor=white)](#)
 [![SQLite WAL](https://img.shields.io/badge/Database-SQLite%20Native%20WAL-003b57?style=for-the-badge&logo=sqlite&logoColor=white)](#)
 [![Native Android Observer](https://img.shields.io/badge/Android-Kotlin%20Observer%20APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](#)
-[![Regression Tests](https://img.shields.io/badge/Tests-33%20Curated%20Suites-success?style=for-the-badge&logo=vitest&logoColor=white)](#)
+[![Regression Tests](https://img.shields.io/badge/Tests-39%20Curated%20Suites-success?style=for-the-badge&logo=vitest&logoColor=white)](#)
 [![White Label Ready](https://img.shields.io/badge/Branding-100%25%20White--Label-f59e0b?style=for-the-badge&logo=target&logoColor=white)](#)
 
 <br/>
@@ -281,13 +281,13 @@ npm test
 ```text
 ============================================================
  YOUPI PG V2 — FULL REGRESSION TEST RUNNER
-Running 31 curated test suites...
+Running 39 curated test suites...
 ============================================================
-[1/31] Testing packages/common/src/__tests__/common.test.js...  PASS (0.22s)
+[1/39] Testing packages/common/src/__tests__/common.test.js...  PASS (0.22s)
 ...
-[31/31] Testing scripts/production-infrastructure.test.js...  PASS (0.17s)
+[39/39] Testing scripts/production-infrastructure.test.js...  PASS (0.17s)
 ============================================================
- ALL 31 TEST SUITES PASSED CLEANLY (Total: 17.68s)
+ ALL 39 TEST SUITES PASSED CLEANLY (Total: 34.02s)
 ============================================================
 ```
 

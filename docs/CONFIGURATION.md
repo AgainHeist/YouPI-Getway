@@ -12,11 +12,9 @@
 | `HELP_PORTAL_PORT` | `3000` | Host port for the Customer Payment Help Portal |
 | `GMAIL_OBSERVER_PORT` | `6003` | Host port for the Gmail Polling Service & OAuth Callback |
 | `SMS_OBSERVER_PORT` | `6002` | Host port for the Google Messages / SMS Web Automator |
-| `DATABASE_URL` | `postgresql://...` | PostgreSQL connection URL |
-| `USE_SQLITE_FALLBACK` | `true` | When true, uses embedded SQLite if PostgreSQL is unreachable |
-| `SQLITE_DB_PATH` | `./data/youpi_pg.sqlite`| Path to local SQLite database file |
+| `SQLITE_DB_PATH` | `./data/youpi_pg.sqlite`| Path to the embedded SQLite database file (native `node:sqlite`, WAL mode). This is the only supported database backend — no PostgreSQL server is required or read |
 | `ENCRYPTION_MASTER_KEY` | `64-hex chars` | 256-bit key for encrypting OAuth credentials and device keys |
-| `JWT_SECRET` | `32+ chars` | Secret key for customer and admin session tokens |
+| `INTERNAL_SERVICE_TOKEN` | auto-generated | Shared credential that lets a co-located render proxy act on behalf of the checkout (`data/.secrets/internal_service_token`). A plain `X-Internal-Render` header alone is never trusted |
 | `PAYMENT_ACTIVE_WINDOW_MS` | `300000` | Duration of active payment slot (5 minutes = 300,000ms) |
 | `PAYMENT_PROCESSING_WINDOW_MS` | `30000` | Duration of verification slot (30 seconds = 30,000ms) |
 | `LATE_OBSERVATION_WINDOW_MS` | `1800000` | Safety window for matching late observations (30 minutes) |
