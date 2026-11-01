@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060a" />
+  <title>Movie player — BhashaFlix AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6b35'/%3E%3Ctext x='16' y='22' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%230a0b10'%3EB%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body data-page="player">
+  <header class="top"><div class="wrap top-inner" id="topbar"></div></header>
+
+  <main class="wrap">
+    <section class="hero" style="padding-bottom:0">
+      <div class="row between">
+        <div>
+          <h1 data-i18n="player.title">Movie player</h1>
+          <p class="lede" data-i18n="player.lede">Switch between the dubbed and the original audio track at any time.</p>
+        </div>
+        <div class="row">
+          <select id="job-picker" style="max-width:260px"></select>
+        </div>
+      </div>
+    </section>
+
+    <section id="empty-card" class="card" style="margin-top:16px">
+      <p data-i18n="player.noJob">Nothing to play yet.</p>
+      <a class="btn primary" href="/history.html" data-i18n="nav.history">History</a>
+    </section>
+
+    <section id="player-wrap" class="hidden" style="margin-top:16px">
+      <div class="player-shell">
+        <video id="video" controls playsinline preload="metadata" crossorigin="anonymous"></video>
+      </div>
+      <div class="card pad-none" style="margin-top:12px">
+        <div class="player-controls">
+          <div class="ctrl-group">
+            <div class="audio-toggle" id="track-toggle">
+              <button data-track="dubbed" class="on" data-i18n="player.dubbed">Dubbed</button>
+              <button data-track="original" data-i18n="player.original">Original audio</button>
+            </div>
+            <button class="btn sm ghost" id="subs-btn" data-i18n="player.subtitles">Subtitles</button>
+            <label class="row tiny" style="gap:6px">
+              <span data-i18n="player.speed">Speed</span>
+              <select id="speed" style="width:auto;padding:6px 10px">
+                <option value="0.5">0.5×</option>
+                <option value="0.75">0.75×</option>
+                <option value="1" selected>1×</option>
+                <option value="1.25">1.25×</option>
+                <option value="1.5">1.5×</option>
+                <option value="2">2×</option>
+              </select>
+            </label>
+            <label class="row tiny" style="gap:6px;min-width:150px">
+              <span data-i18n="player.volume">Volume</span>
+              <input type="range" id="volume" min="0" max="1" step="0.05" value="1" style="flex:1" />
+            </label>
+          </div>
+          <div class="ctrl-group">
+            <button class="btn sm ghost" id="fullscreen-btn">⛶ <span data-i18n="player.fullscreen">Fullscreen</span></button>
+            <a class="btn sm" id="download-link" href="#" data-i18n="common.download">Download</a>
+          </div>
+        </div>
+      </div>
+      <div id="player-notices" class="stack" style="margin-top:12px"></div>
+      <div class="card" style="margin-top:14px">
+        <div class="row between">
+          <div>
+            <div style="font-weight:750" id="player-title">—</div>
+            <div class="tiny muted" id="player-meta">—</div>
+          </div>
+          <span class="badge ok" id="verify-badge" data-i18n="home.badge">video stream copied</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom" id="bottomnav"></nav>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/page-player.js"></script>
+</body>
+</html>

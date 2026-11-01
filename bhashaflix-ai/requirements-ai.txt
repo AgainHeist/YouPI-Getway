@@ -1,0 +1,39 @@
+# Optional heavy AI models — install only what your hardware can run.
+#
+#   pip install -r requirements-ai.txt
+#
+# Each block is independent: the pipeline auto-detects whatever is present and
+# reports the rest as unavailable (it never pretends a missing model works).
+
+# ---- Speech recognition (recommended first install) -------------------------
+# ~1 GB download for the `small` model on first run; CPU int8 works.
+faster-whisper>=1.0
+# Alternative, slower but familiar:
+# openai-whisper>=20231117
+# Fully offline alternative with a local model directory:
+# vosk>=0.3.45
+
+# ---- Speaker diarization ----------------------------------------------------
+# Needs a Hugging Face token (BFLIX_HF_TOKEN) and you must accept the model
+# terms at https://hf.co/pyannote/speaker-diarization-3.1
+# pyannote.audio>=3.1
+# torch>=2.2
+
+# ---- Translation ------------------------------------------------------------
+# NLLB-200 distilled 600M: ~2.4 GB, strong on Hindi/Bhojpuri/Tamil/Telugu/Bengali.
+transformers>=4.40
+torch>=2.2
+sentencepiece>=0.2
+# Offline pair packages (much smaller, weaker quality):
+# argostranslate>=1.9
+
+# ---- Studio-quality voices --------------------------------------------------
+# XTTS-v2 is multilingual and emotional. The Coqui Public Model License is
+# NON-COMMERCIAL: read it, then set COQUI_TOS_AGREED=1.
+# coqui-tts>=0.24
+# Lighter alternative with small per-language ONNX voices:
+# piper-tts>=1.2
+
+# ---- Background separation --------------------------------------------------
+# Best quality (dialogue vs music/effects). ~300 MB weights, much faster on GPU.
+# demucs>=4.0

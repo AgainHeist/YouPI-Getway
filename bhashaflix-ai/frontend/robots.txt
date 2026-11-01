@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /studio.html
+Disallow: /player.html
+Disallow: /status.html

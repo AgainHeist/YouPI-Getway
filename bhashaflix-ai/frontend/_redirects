@@ -1,0 +1,11 @@
+# Cloudflare Pages: clean URLs (the app also works with .html links)
+/            /index.html      200
+/upload      /upload.html     200
+/language    /language.html   200
+/studio      /studio.html     200
+/status      /status.html     200
+/player      /player.html     200
+/download    /download.html   200
+/history     /history.html    200
+/settings    /settings.html   200
+/privacy     /privacy.html    200

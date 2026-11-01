@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060a" />
+  <title>Processing status — BhashaFlix AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6b35'/%3E%3Ctext x='16' y='22' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%230a0b10'%3EB%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body data-page="status">
+  <header class="top"><div class="wrap top-inner" id="topbar"></div></header>
+
+  <main class="wrap">
+    <section class="hero" style="padding-bottom:0">
+      <div class="row between">
+        <h1 data-i18n="status.title">Processing status</h1>
+        <span class="badge" id="job-badge">—</span>
+      </div>
+      <p class="lede" data-i18n="status.lede">Progress comes from completed work, not a timer.</p>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <div class="row between" style="margin-bottom:10px">
+        <div>
+          <div class="title" id="job-name" style="font-weight:750">—</div>
+          <div class="tiny muted" id="job-meta">—</div>
+        </div>
+        <div class="center">
+          <div style="font-size:1.7rem;font-weight:800" id="progress-value">0%</div>
+          <div class="tiny muted" id="stage-label">—</div>
+        </div>
+      </div>
+      <div class="bar big"><i id="progress-bar"></i></div>
+      <div class="row between tiny muted" style="margin-top:8px">
+        <span id="queue-info"></span>
+        <span id="elapsed"></span>
+      </div>
+    </section>
+
+    <div class="grid two" style="margin-top:16px">
+      <section class="card">
+        <h2 data-i18n="status.stage">Stage</h2>
+        <div class="steps" id="stage-list"></div>
+      </section>
+
+      <div>
+        <section class="card hidden" id="error-card">
+          <div class="row between">
+            <h2 style="margin:0;color:var(--err)" data-i18n="status.failed">This job failed</h2>
+            <span class="badge err" id="error-code"></span>
+          </div>
+          <p id="error-message" style="margin-top:10px"></p>
+          <div class="pill-note hidden" id="error-hint-box">
+            <b data-i18n="status.hint">Hint</b>
+            <span id="error-hint"></span>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn primary" id="retry-btn" data-i18n="common.retry">Retry</button>
+            <a class="btn ghost" href="/studio.html" id="fix-link" data-i18n="status.openStudio">Open studio</a>
+          </div>
+        </section>
+
+        <section class="card hidden" id="done-card">
+          <h2 style="margin:0;color:var(--ok)" data-i18n="status.completed">Dubbing complete</h2>
+          <div id="verification" class="stack" style="margin-top:12px"></div>
+          <div class="row" style="margin-top:14px">
+            <a class="btn primary" id="player-link" href="#" data-i18n="status.openPlayer">Open player</a>
+            <a class="btn" id="download-link" href="#" data-i18n="status.openDownload">Download files</a>
+          </div>
+        </section>
+
+        <section class="card" style="margin-top:16px">
+          <div class="row between">
+            <h2 style="margin:0" data-i18n="status.log">Event log</h2>
+            <button class="btn sm ghost" id="copy-log" data-i18n="common.copy">Copy</button>
+          </div>
+          <div id="events" class="stack tiny" style="margin-top:10px;max-height:46vh;overflow:auto"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bottom" id="bottomnav"></nav>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/page-status.js"></script>
+</body>
+</html>

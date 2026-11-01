@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060a" />
+  <title>Settings — BhashaFlix AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6b35'/%3E%3Ctext x='16' y='22' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%230a0b10'%3EB%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body data-page="settings">
+  <header class="top"><div class="wrap top-inner" id="topbar"></div></header>
+
+  <main class="wrap">
+    <section class="hero" style="padding-bottom:0">
+      <h1 data-i18n="settings.title">Settings</h1>
+      <p class="lede" data-i18n="settings.lede">These settings live in your browser, not on the server.</p>
+    </section>
+
+    <div class="grid two" style="margin-top:16px">
+      <section class="card">
+        <h2 data-i18n="settings.language">Interface language</h2>
+        <div class="row" style="margin-bottom:16px">
+          <button class="btn sm" data-set-lang="en">English</button>
+          <button class="btn sm" data-set-lang="hi">हिन्दी</button>
+        </div>
+
+        <label class="field">
+          <span data-i18n="settings.backend">Backend URL</span>
+          <input type="url" id="backend" placeholder="https://your-worker.example.com" />
+          <small data-i18n="settings.backendHint">Leave empty to use this page's origin.</small>
+        </label>
+        <label class="field">
+          <span data-i18n="settings.token">Access token</span>
+          <input type="password" id="token" autocomplete="off" placeholder="only if the operator set BFLIX_API_TOKEN" />
+          <small data-i18n="settings.tokenHint">Only needed if the operator set a token.</small>
+        </label>
+        <label class="field">
+          <span data-i18n="settings.defaultTarget">Default dub language</span>
+          <select id="default-target"></select>
+        </label>
+        <label class="field">
+          <span data-i18n="settings.defaultMode">Default dialogue source</span>
+          <select id="default-mode">
+            <option value="auto">Automatic speech recognition</option>
+            <option value="subtitles">I have subtitle files</option>
+            <option value="manual">I will type the dialogue</option>
+          </select>
+        </label>
+        <div class="row">
+          <button class="btn primary" id="save-settings" data-i18n="common.save">Save</button>
+          <button class="btn danger" id="clear-data" data-i18n="settings.clear">Clear local data</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 data-i18n="settings.serverInfo">Server information</h2>
+        <div id="server-info" class="stack tiny">
+          <div class="skeleton" style="height:80px"></div>
+        </div>
+        <h3 style="margin-top:18px" data-i18n="settings.capabilities">Installed engines</h3>
+        <div id="caps" class="stack tiny"></div>
+      </section>
+    </div>
+  </main>
+
+  <nav class="bottom" id="bottomnav"></nav>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/page-settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060a" />
+  <title>Language selection — BhashaFlix AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6b35'/%3E%3Ctext x='16' y='22' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%230a0b10'%3EB%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body data-page="language">
+  <header class="top"><div class="wrap top-inner" id="topbar"></div></header>
+
+  <main class="wrap">
+    <section class="hero" style="padding-bottom:0">
+      <h1 data-i18n="lang.title">Language selection</h1>
+      <p class="lede" data-i18n="lang.lede">Pick the language you want to hear.</p>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2 data-i18n="lang.targets">Dub into</h2>
+      <div class="lang-grid" id="targets"></div>
+      <hr class="sep" />
+      <h3 data-i18n="lang.sources">Original language</h3>
+      <div class="lang-grid" id="sources"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <div class="row between">
+        <h2 style="margin:0" data-i18n="lang.voices">Voices available for this language</h2>
+        <button class="btn sm ghost" id="reload-voices" data-i18n="history.refresh">Refresh</button>
+      </div>
+      <div id="voices" class="stack" style="margin-top:12px"></div>
+      <div class="pill-note" style="margin-top:12px">
+        <span class="tiny" data-i18n="lang.note">Low-resource languages depend on installed models.</span>
+      </div>
+    </section>
+
+    <div class="row" style="margin-top:18px">
+      <button class="btn primary" id="save-pref" data-i18n="lang.save">Save preference</button>
+      <a class="btn" href="/upload.html" data-i18n="lang.continue">Continue to upload</a>
+    </div>
+  </main>
+
+  <nav class="bottom" id="bottomnav"></nav>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/page-language.js"></script>
+</body>
+</html>
