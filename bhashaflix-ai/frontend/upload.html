@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060a" />
+  <title>Upload a movie — BhashaFlix AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6b35'/%3E%3Ctext x='16' y='22' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%230a0b10'%3EB%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body data-page="upload">
+  <header class="top"><div class="wrap top-inner" id="topbar"></div></header>
+
+  <main class="wrap">
+    <section class="hero" style="padding-bottom:0">
+      <h1 data-i18n="upload.title">Upload a movie</h1>
+      <p class="lede" data-i18n="upload.lede">MP4, MKV or MOV. Your file is stored unchanged.</p>
+    </section>
+
+    <form id="upload-form" class="grid two" style="margin-top:18px" novalidate>
+      <div class="card">
+        <div class="dropzone" id="dropzone" role="button" tabindex="0">
+          <div id="dz-icon"></div>
+          <div class="big" data-i18n="upload.dropzone">Tap to choose a video, or drop it here</div>
+          <div class="tiny muted" data-i18n="upload.dropzoneHint">MP4 · MKV · MOV · M4V · WEBM</div>
+          <div class="tiny" id="size-limit" style="margin-top:8px;color:var(--muted-2)"></div>
+          <input type="file" id="file-input" accept="video/mp4,video/x-matroska,video/quicktime,.mp4,.mkv,.mov,.m4v,.webm" class="sr-only" />
+        </div>
+        <div id="file-info" class="stack" style="margin-top:12px"></div>
+
+        <label class="field" style="margin-top:16px">
+          <span data-i18n="upload.sourceSubs">Original-language subtitles (SRT/VTT)</span>
+          <input type="file" id="sub-input" accept=".srt,.vtt" />
+        </label>
+        <label class="field" id="target-sub-field">
+          <span data-i18n="upload.targetSubs">Already-translated subtitles (SRT/VTT)</span>
+          <input type="file" id="tsub-input" accept=".srt,.vtt" />
+        </label>
+        <p class="tiny muted">Subtitles are optional. With a subtitle file the pipeline skips speech recognition and stays 100% free.</p>
+      </div>
+
+      <div>
+        <div class="card">
+          <label class="field">
+            <span data-i18n="upload.targetLang">Dub into</span>
+            <select id="target-lang"></select>
+          </label>
+          <label class="field">
+            <span data-i18n="upload.sourceLang">Original language</span>
+            <select id="source-lang"></select>
+          </label>
+          <label class="field">
+            <span data-i18n="upload.mode">Dialogue source</span>
+            <select id="mode">
+              <option value="auto" data-i18n="upload.mode.auto">Automatic speech recognition</option>
+              <option value="subtitles" data-i18n="upload.mode.subtitles">I have subtitle files</option>
+              <option value="manual" data-i18n="upload.mode.manual">I will type the dialogue myself</option>
+            </select>
+          </label>
+          <label class="field">
+            <span data-i18n="upload.stopAfter">Pause for review after</span>
+            <select id="stop-after">
+              <option value="" data-i18n="upload.stopAfter.none">Render everything automatically</option>
+              <option value="translate" data-i18n="upload.stopAfter.translate">Translation</option>
+              <option value="voices" data-i18n="upload.stopAfter.voices">Voice generation</option>
+            </select>
+          </label>
+        </div>
+
+        <details class="card" style="margin-top:14px">
+          <summary style="cursor:pointer;font-weight:700" data-i18n="upload.options">Advanced</summary>
+          <label class="field" style="margin-top:14px">
+            <span data-i18n="upload.separation">Background separation</span>
+            <select id="separation">
+              <option value="auto" data-i18n="upload.separation.auto">Auto (best available)</option>
+              <option value="center-suppression" data-i18n="upload.separation.center">Stereo centre extraction</option>
+              <option value="demucs">Demucs (needs a GPU worker)</option>
+              <option value="ducking" data-i18n="upload.separation.ducking">Keep original mix, duck it</option>
+            </select>
+          </label>
+          <p class="tiny muted">Demucs gives the cleanest background but needs torch + weights. Centre extraction works on any CPU.</p>
+        </details>
+
+        <label class="row tiny" style="margin:16px 0 10px; align-items:flex-start; gap:8px">
+          <input type="checkbox" id="consent" style="width:auto;margin-top:3px" />
+          <span data-i18n="upload.accept">By uploading you confirm you own this content.</span>
+        </label>
+
+        <div id="progress-wrap" class="hidden" style="margin-bottom:12px">
+          <div class="row between tiny" style="margin-bottom:6px">
+            <span data-i18n="upload.uploading">Uploading…</span>
+            <span id="progress-pct">0%</span>
+          </div>
+          <div class="bar big"><i id="progress-bar"></i></div>
+        </div>
+
+        <div id="upload-error" class="hidden"></div>
+
+        <button type="submit" class="btn primary block" id="submit-btn" data-i18n="upload.submit">Upload &amp; start</button>
+        <a class="btn ghost block" href="/language.html" style="margin-top:10px" data-i18n="lang.title">Language selection</a>
+      </div>
+    </form>
+  </main>
+
+  <nav class="bottom" id="bottomnav"></nav>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/page-upload.js"></script>
+</body>
+</html>

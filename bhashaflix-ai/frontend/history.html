@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060a" />
+  <title>History — BhashaFlix AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6b35'/%3E%3Ctext x='16' y='22' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%230a0b10'%3EB%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body data-page="history">
+  <header class="top"><div class="wrap top-inner" id="topbar"></div></header>
+
+  <main class="wrap">
+    <section class="hero" style="padding-bottom:0">
+      <div class="row between">
+        <div>
+          <h1 data-i18n="history.title">History</h1>
+          <p class="lede" data-i18n="history.lede">Every project on this server.</p>
+        </div>
+        <div class="row">
+          <select id="filter" style="width:auto">
+            <option value="" data-i18n="common.all">All</option>
+            <option value="completed">completed</option>
+            <option value="running">running</option>
+            <option value="queued">queued</option>
+            <option value="awaiting_input">awaiting review</option>
+            <option value="failed">failed</option>
+          </select>
+          <button class="btn sm" id="refresh" data-i18n="history.refresh">Refresh</button>
+          <a class="btn sm primary" href="/upload.html" data-i18n="nav.upload">Upload</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <div class="row between tiny muted" style="margin-bottom:10px">
+        <span id="history-count">—</span>
+        <span id="storage-info">—</span>
+      </div>
+      <div id="jobs" class="stack"></div>
+    </section>
+  </main>
+
+  <nav class="bottom" id="bottomnav"></nav>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/page-history.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060a" />
+  <meta name="description" content="BhashaFlix AI — watch the same movie in your language. Only the spoken dialogue is replaced with AI voices; the original video is never altered." />
+  <title>BhashaFlix AI — Movie dubbing, original picture intact</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6b35'/%3E%3Ctext x='16' y='22' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%230a0b10'%3EB%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body data-page="home">
+  <header class="top"><div class="wrap top-inner" id="topbar"></div></header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow" data-i18n="home.eyebrow">Original picture. New language.</div>
+      <h1>
+        <span data-i18n="home.title1">Watch the same movie.</span><br />
+        <span class="hero-title-grad" data-i18n="home.title2">In your language.</span>
+      </h1>
+      <p class="lede" data-i18n="home.lede">BhashaFlix AI replaces only the spoken dialogue with AI voices in your language.</p>
+      <div class="row" style="margin-top:18px">
+        <a class="btn primary" href="/upload.html" id="cta-upload">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          <span data-i18n="home.cta.upload">Start dubbing</span>
+        </a>
+        <a class="btn ghost" href="#how" data-i18n="home.cta.how">How it works</a>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <div class="row between">
+        <h2 style="margin:0" data-i18n="home.principle.title">The one rule we never break</h2>
+        <span class="badge ok" id="verify-badge" data-i18n="home.badge">video stream copied</span>
+      </div>
+      <div class="grid three" style="margin-top:16px">
+        <div class="principle">
+          <div class="ic ok" id="ic-video"></div>
+          <div>
+            <h3 data-i18n="home.principle.1.t">The video is never re-encoded</h3>
+            <p class="tiny" data-i18n="home.principle.1.d">We copy the original compressed video stream.</p>
+          </div>
+        </div>
+        <div class="principle">
+          <div class="ic" id="ic-audio"></div>
+          <div>
+            <h3 data-i18n="home.principle.2.t">Only dialogue is replaced</h3>
+            <p class="tiny" data-i18n="home.principle.2.d">Music and effects are separated and kept.</p>
+          </div>
+        </div>
+        <div class="principle">
+          <div class="ic warn" id="ic-budget"></div>
+          <div>
+            <h3 data-i18n="home.principle.3.t">Honest about the ₹0 budget</h3>
+            <p class="tiny" data-i18n="home.principle.3.d">Free hosting has no unlimited GPU.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" style="margin-top:26px">
+      <h2 data-i18n="home.how.title">Nine real stages</h2>
+      <p data-i18n="home.how.lede">Every stage either runs for real or fails with a clear error.</p>
+      <div class="steps" id="stage-list"></div>
+    </section>
+
+    <section class="grid two" style="margin-top:26px">
+      <div class="card">
+        <h2 data-i18n="home.caps.title">This backend right now</h2>
+        <p class="tiny" data-i18n="home.caps.lede">Detected live from the server.</p>
+        <div id="capabilities" class="stack">
+          <div class="skeleton" style="height:64px"></div>
+          <div class="skeleton" style="height:64px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="home.limits.title">What works on a free machine</h2>
+        <div class="stack tiny" id="limits">
+          <p data-i18n="home.limits.1">FFmpeg analysis and rendering always run.</p>
+          <p data-i18n="home.limits.2">Speech, translation and voices need models.</p>
+          <p data-i18n="home.limits.3">You can paste dialogue yourself.</p>
+        </div>
+        <div class="pill-note" style="margin-top:12px">
+          <span id="retention-note">Files are deleted automatically.</span>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-top:26px">
+      <div class="row between">
+        <h2 style="margin:0" data-i18n="home.recent.title">Recent projects</h2>
+        <a class="btn sm ghost" href="/history.html" data-i18n="nav.history">History</a>
+      </div>
+      <div id="recent" class="stack" style="margin-top:12px">
+        <div class="skeleton" style="height:72px"></div>
+      </div>
+    </section>
+
+    <footer class="wrap center tiny" style="margin:34px 0 22px; color: var(--muted-2)">
+      <div class="brand-line" style="width:64px; margin:0 auto 12px"></div>
+      <div>BhashaFlix AI · <a href="/privacy.html" data-i18n="nav.privacy">Privacy &amp; Copyright</a> · <a href="/settings.html" data-i18n="nav.settings">Settings</a></div>
+      <div style="margin-top:6px">Only dub content you own or may process.</div>
+    </footer>
+  </main>
+
+  <nav class="bottom" id="bottomnav"></nav>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/page-home.js"></script>
+</body>
+</html>

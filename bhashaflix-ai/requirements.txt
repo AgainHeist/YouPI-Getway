@@ -1,0 +1,15 @@
+# BhashaFlix AI — core runtime (installs on any free CPU tier)
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.27,<1.0
+python-multipart>=0.0.9
+pydantic>=2.6,<3.0
+numpy>=1.26
+av>=12.0
+imageio-ffmpeg>=0.5          # bundles a static FFmpeg binary (≈30 MB wheel)
+
+# Offline TTS that needs no model download (real speech, robotic timbre).
+# This is what makes the pipeline work end-to-end on a ₹0 box.
+espeakng-loader>=0.2.4
+
+# ---- optional, installed separately for better quality -----------------------
+# pip install -r requirements-ai.txt

@@ -1,0 +1,17 @@
+# BhashaFlix AI — generated/cached data, never committed
+storage/
+!storage/.gitkeep
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.wav
+*.mp4
+*.mkv
+*.m4a
+*.onnx
+.pytest_cache/
+__pycache__/
+*.pyc
+.venv/
+.env
+sample_media/
