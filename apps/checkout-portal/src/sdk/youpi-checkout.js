@@ -60,6 +60,25 @@
   /**
    * YoupiCheckout class
    */
+  /**
+   * The gateway stores only an absolute http(s) returnUrl, so a relative successUrl is
+   * resolved against this storefront's own origin before it is sent. Without this a
+   * merchant using `data-success-url="/success"` would get a 400 from the API.
+   * @param {string} [raw]
+   * @returns {string|undefined} absolute http(s) URL, or undefined when unusable
+   */
+  function resolveReturnUrl(raw) {
+    if (!raw) return undefined;
+    try {
+      const base = (typeof window !== 'undefined' && window.location) ? window.location.href : undefined;
+      const parsed = new URL(raw, base);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return undefined;
+      return parsed.href;
+    } catch (e) {
+      return undefined;
+    }
+  }
+
   class YoupiCheckout {
     /**
      * @param {{
@@ -192,7 +211,7 @@
             customer: (custPayload.email || custPayload.phoneNumber || custPayload.fullName) ? custPayload : undefined,
             description: instance.options.description,
             metadata: instance.options.metadata,
-            returnUrl: instance.options.successUrl || undefined
+            returnUrl: resolveReturnUrl(instance.options.successUrl)
           })
         });
 
@@ -261,11 +280,32 @@
             targetUrl = `${window.location.protocol}//${window.location.host}${parsed.pathname}${parsed.search}`;
           }
         } catch {}
+      } else if (isBrowser) {
+        // Conversely, if running on a deployed web origin (e.g. Vercel / preview host) and targetUrl points to localhost, rewrite to the portal's origin
+        try {
+          const parsed = new URL(targetUrl, window.location.origin);
+          if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+            const baseOrigin = (scriptConfig.portalUrl && !scriptConfig.portalUrl.includes('localhost'))
+              ? new URL(scriptConfig.portalUrl, window.location.origin).origin
+              : window.location.origin;
+            targetUrl = `${baseOrigin}${parsed.pathname}${parsed.search}`;
+          }
+        } catch {}
       }
 
       // Add embedded flag and custom params
       const sep = targetUrl.includes('?') ? '&' : '?';
       targetUrl = `${targetUrl}${sep}embedded=1`;
+
+      // Declare this page's origin so the checkout can target its postMessages
+      // even when the browser strips the referrer. Opaque origins (file:) and
+      // non-http(s) schemes must not be announced.
+      try {
+        const parsed = new URL(window.location.href);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          targetUrl += `&youpiParentOrigin=${encodeURIComponent(parsed.origin)}`;
+        }
+      } catch {}
 
       if (this.options.amount) {
         targetUrl += `&customAmount=${encodeURIComponent(this.options.amount)}`;
@@ -350,10 +390,8 @@
       backdrop.appendChild(container);
       document.body.appendChild(backdrop);
 
-      requestAnimationFrame(() => {
-        backdrop.classList.add('active');
-        container.classList.add('active');
-      });
+      backdrop.classList.add('active');
+      container.classList.add('active');
 
       this.backdrop = backdrop;
       this.container = container;
@@ -379,7 +417,7 @@
       backdrop.addEventListener('mouseup', stopOutsideDismiss, true);
     }
 
-    _isSafeRedirect(url) {
+_isSafeRedirect(url) {
       try {
         const u = new URL(url, window.location.href);
         return u.protocol === 'http:' || u.protocol === 'https:';
@@ -388,11 +426,27 @@
       }
     }
 
+    /**
+     * Origin of the checkout iframe this instance embeds. Messages from any
+     * other origin are ignored so a third party cannot forge payment events.
+     */
+    _checkoutOrigin() {
+      try {
+        // Only an explicitly configured checkout URL is authoritative. `portalUrl` defaults
+        // to localhost, so including it would make this check reject legitimate messages.
+        if (this.options.checkoutUrl) return new URL(this.options.checkoutUrl, window.location.href).origin;
+      } catch (e) { }
+      return null;
+    }
+
     _handleMessage(e) {
       // Ignore messages from any window other than our checkout iframe (spoofed success events).
       if (!this._iframe || e.source !== this._iframe.contentWindow) return;
       if (!this._iframeOrigin || e.origin !== this._iframeOrigin) return;
       if (!e.data || typeof e.data !== 'object') return;
+
+      const expectedOrigin = this._checkoutOrigin();
+      if (expectedOrigin && e.origin !== expectedOrigin) return;
 
       const event = e.data.event;
       const rawData = e.data.data || e.data;
@@ -719,28 +773,38 @@
         /* MOBILE BOTTOM DRAWER / BOTTOM SHEET STYLES */
         @media (max-width: 767px) {
           .youpi-checkout-backdrop {
-            align-items: flex-end;
+            position: fixed !important;
+            inset: 0 !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            display: flex !important;
+            align-items: flex-end !important;
+            justify-content: center !important;
+            padding: 0 !important;
+            margin: 0 !important;
           }
           .youpi-checkout-container {
-            width: 100vw;
-            max-width: 100vw;
-            height: 100dvh;
-            height: 100vh;
-            height: 100%;
-            max-height: 100dvh;
-            border-bottom-left-radius: 0;
-            border-bottom-right-radius: 0;
-            border-top-left-radius: 18px;
-            border-top-right-radius: 18px;
-            transform: translateY(100%);
+            width: 100vw !important;
+            max-width: 100vw !important;
+            height: 90vh !important;
+            height: 90dvh !important;
+            max-height: 94vh !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            border-top-left-radius: 20px !important;
+            border-top-right-radius: 20px !important;
+            margin: 0 !important;
+            transform: translateY(0) !important;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6) !important;
             touch-action: auto !important;
-            overflow: hidden;
-          }
-          .youpi-checkout-container.active {
-            transform: translateY(0);
+            overflow: hidden !important;
           }
           .youpi-checkout-container.closing {
-            transform: translateY(100%);
+            transform: translateY(100%) !important;
           }
         }
       `;

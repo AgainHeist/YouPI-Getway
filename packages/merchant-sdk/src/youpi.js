@@ -280,6 +280,17 @@
             targetUrl = `${window.location.protocol}//${window.location.host}${parsed.pathname}${parsed.search}`;
           }
         } catch {}
+      } else if (isBrowser) {
+        // Conversely, if running on a deployed web origin (e.g. Vercel / preview host) and targetUrl points to localhost, rewrite to the portal's origin
+        try {
+          const parsed = new URL(targetUrl, window.location.origin);
+          if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+            const baseOrigin = (scriptConfig.portalUrl && !scriptConfig.portalUrl.includes('localhost'))
+              ? new URL(scriptConfig.portalUrl, window.location.origin).origin
+              : window.location.origin;
+            targetUrl = `${baseOrigin}${parsed.pathname}${parsed.search}`;
+          }
+        } catch {}
       }
 
       // Add embedded flag and custom params

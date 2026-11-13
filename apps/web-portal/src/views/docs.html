@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{DOC_TITLE}} — YOUPI PG V2 Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/site/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-bar">
+      <a href="/" class="brand-link">
+        <div class="brand-mark">⚡</div>
+        <div>
+          <span class="brand-name">YOUPI PG</span>
+          <span class="brand-tag">DOCUMENTATION HUB</span>
+        </div>
+      </a>
+      <nav class="nav-links">
+        <a href="/">← Website Home</a>
+        <a href="/store">Demo Store</a>
+        <a href="/admin">Merchant Admin</a>
+        <a href="/api-docs">API Explorer</a>
+        <a href="/openapi.yaml">OpenAPI YAML</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="/" class="btn btn-primary">⚡ Live Sandbox</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container docs-layout">
+    <aside class="docs-sidebar">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--emerald-400);padding:6px 12px 10px;">
+        Official Guides (12)
+      </div>
+      {{DOCS_NAV_HTML}}
+    </aside>
+
+    <article class="docs-article">
+      {{DOC_CONTENT_HTML}}
+    </article>
+  </div>
+</body>
+</html>

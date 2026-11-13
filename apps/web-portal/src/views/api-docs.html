@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive REST API Explorer — YOUPI PG V2</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/site/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-bar">
+      <a href="/" class="brand-link">
+        <div class="brand-mark">⚡</div>
+        <div>
+          <span class="brand-name">YOUPI PG</span>
+          <span class="brand-tag">REST API EXPLORER</span>
+        </div>
+      </a>
+      <nav class="nav-links">
+        <a href="/">← Website Home</a>
+        <a href="/docs">Documentation</a>
+        <a href="/store">Demo Store</a>
+        <a href="/admin">Merchant Admin</a>
+        <a href="/openapi.yaml" target="_blank">Raw openapi.yaml ↗</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="/openapi.yaml" class="btn btn-outline">⬇️ Download OpenAPI</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding:42px 22px 80px;">
+    <div style="max-width:780px;margin-bottom:34px;">
+      <span class="eyebrow">OpenAPI 3.0.3 Live Console</span>
+      <h1 style="font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.6rem);margin:4px 0 12px;">
+        Test Real Gateway Endpoints in Your Browser
+      </h1>
+      <p style="color:var(--text-secondary);margin:0;">
+        Execute live HTTP requests against this YOUPI PG V2 deployment and inspect real status codes, headers, and JSON responses.
+      </p>
+    </div>
+
+    <div class="calc-grid">
+      <div class="calc-panel">
+        <h3 style="font-family:var(--font-display);margin:0 0 16px;">Select Endpoint Preset</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;">
+          <button type="button" class="btn btn-outline" style="justify-content:flex-start;" data-preset="health">
+            <span style="color:#34d399;font-family:var(--font-mono);">GET</span> /health — Core Gateway Health
+          </button>
+          <button type="button" class="btn btn-outline" style="justify-content:flex-start;" data-preset="platform">
+            <span style="color:#34d399;font-family:var(--font-mono);">GET</span> /api/platform/status — Live Slot &amp; DB Telemetry
+          </button>
+          <button type="button" class="btn btn-outline" style="justify-content:flex-start;" data-preset="createPayment">
+            <span style="color:#38bdf8;font-family:var(--font-mono);">POST</span> /api/v1/payments — Create UPI Payment Session
+          </button>
+          <button type="button" class="btn btn-outline" style="justify-content:flex-start;" data-preset="checkUser">
+            <span style="color:#38bdf8;font-family:var(--font-mono);">POST</span> /api/v1/customer/check-user — Check Buyer Mobile
+          </button>
+          <button type="button" class="btn btn-outline" style="justify-content:flex-start;" data-preset="wallet">
+            <span style="color:#34d399;font-family:var(--font-mono);">GET</span> /api/wallet-balance — Demo Store Wallet Ledger
+          </button>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <label class="field-label" for="apiMethod">Method &amp; Path</label>
+          <div style="display:grid;grid-template-columns:110px 1fr;gap:8px;">
+            <select id="apiMethod" class="field-input">
+              <option value="GET">GET</option>
+              <option value="POST" selected>POST</option>
+            </select>
+            <input id="apiPath" type="text" class="field-input" value="/api/v1/payments" />
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label class="field-label" for="apiBody">JSON Request Body (for POST)</label>
+          <textarea id="apiBody" rows="7" class="field-input" style="font-family:var(--font-mono);font-size:12.5px;">{
+  "orderId": "API-EXPLORER-1001",
+  "amount": "99.00",
+  "currency": "INR",
+  "description": "Live API Explorer Test"
+}</textarea>
+        </div>
+
+        <button type="button" id="btnSendApiReq" class="btn btn-primary" style="width:100%;padding:12px;">
+          ▶ Send Live Request
+        </button>
+      </div>
+
+      <div class="calc-panel" style="display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="font-family:var(--font-display);margin:0;">Live HTTP Response</h3>
+          <span id="apiStatusPill" class="sandbox-badge">Ready</span>
+        </div>
+        <pre id="apiResponseOutput" class="code-pre" style="flex:1;background:#030806;border:1px solid var(--border-subtle);border-radius:12px;min-height:320px;">Click "Send Live Request" to inspect the real gateway response...</pre>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var PRESETS = {
+        health: { method: 'GET', path: '/health', body: '' },
+        platform: { method: 'GET', path: '/api/platform/status', body: '' },
+        wallet: { method: 'GET', path: '/api/wallet-balance', body: '' },
+        createPayment: {
+          method: 'POST',
+          path: '/api/v1/payments',
+          body: JSON.stringify({
+            orderId: 'API-TEST-' + Date.now(),
+            amount: '99.00',
+            currency: 'INR',
+            description: 'Live API Explorer Test'
+          }, null, 2)
+        },
+        checkUser: {
+          method: 'POST',
+          path: '/api/v1/customer/check-user',
+          body: JSON.stringify({ mobileNumber: '9876543210' }, null, 2)
+        }
+      };
+
+      var methodEl = document.getElementById('apiMethod');
+      var pathEl = document.getElementById('apiPath');
+      var bodyEl = document.getElementById('apiBody');
+      var statusEl = document.getElementById('apiStatusPill');
+      var outEl = document.getElementById('apiResponseOutput');
+
+      document.querySelectorAll('[data-preset]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var key = btn.getAttribute('data-preset');
+          var p = PRESETS[key];
+          if (!p) return;
+          if (key === 'createPayment') {
+            p.body = JSON.stringify({
+              orderId: 'API-TEST-' + Date.now(),
+              amount: '99.00',
+              currency: 'INR',
+              description: 'Live API Explorer Test'
+            }, null, 2);
+          }
+          methodEl.value = p.method;
+          pathEl.value = p.path;
+          bodyEl.value = p.body;
+        });
+      });
+
+      document.getElementById('btnSendApiReq').addEventListener('click', function () {
+        var m = methodEl.value;
+        var p = pathEl.value.trim() || '/health';
+        statusEl.textContent = 'Sending...';
+        var opts = { method: m, headers: {} };
+        if (m === 'POST' && bodyEl.value.trim()) {
+          opts.headers['Content-Type'] = 'application/json';
+          opts.body = bodyEl.value;
+        }
+        var t0 = performance.now();
+        fetch(p, opts)
+          .then(function (r) {
+            var ms = Math.round(performance.now() - t0);
+            statusEl.textContent = 'HTTP ' + r.status + ' · ' + ms + 'ms';
+            return r.text();
+          })
+          .then(function (txt) {
+            try {
+              outEl.textContent = JSON.stringify(JSON.parse(txt), null, 2);
+            } catch (e) {
+              outEl.textContent = txt;
+            }
+          })
+          .catch(function (err) {
+            statusEl.textContent = 'Error';
+            outEl.textContent = String(err);
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YOUPI PG V2 — Self-Hosted Sovereign UPI Payment Gateway (0% Fees Forever)</title>
+  <meta name="description" content="YOUPI PG V2 is a self-hosted white-label UPI payment gateway with 0% transaction fees, direct-to-bank P2P settlement, WhatsApp OTP authentication, vector SVG QR codes, and real-time Bank SMS & Gmail verification." />
+  <meta property="og:title" content="YOUPI PG V2 — Self-Hosted UPI Payment Gateway" />
+  <meta property="og:description" content="0% Gateway Fees Forever • Direct-to-Bank Settlement • WhatsApp Pre-Checkout OTP • Native Android SMS & Gmail Observers" />
+  <meta property="og:image" content="/og-banner.svg" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/site/styles.css" />
+  <script src="/youpi.js" data-youpi-key="00000000-0000-0000-0000-000000000001" data-currency="INR"></script>
+</head>
+<body>
+
+  <!-- Top Announcement Ribbon -->
+  <div class="top-ribbon">
+    <div class="top-ribbon-inner">
+      <span class="ribbon-pill">YOUPI PG V2</span>
+      <span>Sovereign Self-Hosted UPI Payment Gateway • <strong>0% MDR Forever</strong> • Direct P2P Bank Settlement</span>
+      <a href="/docs" style="color:#6ee7b7;font-weight:700;text-decoration:underline;">Read Documentation →</a>
+    </div>
+  </div>
+
+  <!-- Sticky Navigation Header -->
+  <header class="site-header">
+    <div class="container nav-bar">
+      <a href="/" class="brand-link">
+        <div class="brand-mark">⚡</div>
+        <div>
+          <span class="brand-name">YOUPI PG</span>
+          <span class="brand-tag">SOVEREIGN V2 GATEWAY</span>
+        </div>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#portals">Live Portals</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#features">Features</a>
+        <a href="#calculator">0% Fee Calculator</a>
+        <a href="#developers">Developers</a>
+        <a href="/docs">Docs</a>
+        <a href="/api-docs">API Explorer</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="/store" class="btn btn-outline hide-mobile">🛒 Demo Store</a>
+        <a href="/admin" class="btn btn-outline hide-mobile">🛡️ Merchant Admin</a>
+        <button type="button" class="btn btn-primary" data-launch-sandbox>⚡ Try ₹1 Demo Checkout</button>
+        <button type="button" class="mobile-menu-btn" id="mobileMenuToggle" aria-label="Toggle Menu">☰</button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-drawer" id="mobileNavDrawer">
+      <a href="#portals">🚀 Live Portals (Store, Admin, Wallet, Help)</a>
+      <a href="#architecture">⚙️ How It Works &amp; Invariants</a>
+      <a href="#features">✨ Gateway Superpowers</a>
+      <a href="#calculator">💰 Savings Calculator</a>
+      <a href="#developers">💻 One-Script SDK &amp; Webhooks</a>
+      <a href="/docs">📖 Full Documentation Hub</a>
+      <a href="/api-docs">🔌 Interactive REST API Explorer</a>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:6px;">
+        <a href="/store" class="btn btn-outline">🛒 Demo Store</a>
+        <a href="/admin" class="btn btn-outline">🛡️ Admin Hub</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section + Live Interactive Checkout Playground -->
+  <div style="padding:12px 20px;text-align:center;background:#18362e;color:#ddfff1;font-size:14px;">Website demo: simulated payments only. Do not send real money or use personal information. Vercel storage is temporary; not suitable for production payments.</div>
+  <section class="hero-section">
+    <div class="container hero-grid">
+
+      <!-- Left Column: Value Proposition -->
+      <div>
+        <div class="live-telemetry-pill">
+          <span class="pulse-dot"></span>
+          <span id="liveStatusText">Gateway Online • Slot Ready • SQLite WAL</span>
+        </div>
+
+        <h1 class="hero-title">
+          Direct-to-Bank <span class="text-gradient">UPI Payments</span> with 0% Gateway Fees.
+        </h1>
+
+        <p class="hero-lead">
+          Eliminate 2–3% aggregator fees, T+3 settlement holdbacks, and fake COD orders.
+          <strong>YOUPI PG V2</strong> combines pure ISO vector UPI QR codes, pre-checkout WhatsApp OTP verification,
+          deterministic single-slot FIFO queuing, and real-time Bank SMS &amp; Gmail credit detection.
+        </p>
+
+        <div class="hero-cta-row">
+          <button type="button" class="btn btn-primary btn-lg" data-launch-sandbox>
+            ⚡ Launch Interactive Checkout
+          </button>
+          <a href="/store" class="btn btn-outline btn-lg">
+            🛍️ Open Showcase Store
+          </a>
+          <a href="/admin" class="btn btn-ghost btn-lg">
+            🎛️ Open Merchant Hub
+          </a>
+        </div>
+
+        <div class="hero-metrics">
+          <div class="metric-item">
+            <strong>0.00%</strong>
+            <span>Platform &amp; MDR Fees</span>
+          </div>
+          <div class="metric-item">
+            <strong>Instant</strong>
+            <span>Direct Bank Credit</span>
+          </div>
+          <div class="metric-item">
+            <strong>40 / 40</strong>
+            <span>Verified Test Suites</span>
+          </div>
+          <div class="metric-item">
+            <strong id="metricTotalSessions">{{TOTAL_SESSIONS}}</strong>
+            <span>Live Sandbox Sessions</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Interactive Gateway Playground -->
+      <div class="sandbox-card" id="sandbox">
+        <div class="sandbox-top">
+          <span class="sandbox-badge" id="sandboxSlotBadge">Slot Ready · 0ms Queue</span>
+          <span class="vpa-chip" id="liveVpaChip">VPA: {{DEFAULT_VPA}}</span>
+        </div>
+
+        <div class="amount-display-box">
+          <div>
+            <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">
+              Interactive Demo Checkout Amount
+            </div>
+            <div class="amount-big" id="sandboxAmountBig">₹1.00</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11.5px;color:var(--emerald-400);font-weight:700;display:block;">✓ Real Vector SVG QR</span>
+            <span style="font-size:11.5px;color:var(--text-muted);">1-Tap SMS Credit Sim</span>
+          </div>
+        </div>
+
+        <div class="amount-Chips">
+          <button type="button" class="amt-chip active" data-amt-chip="1">₹1</button>
+          <button type="button" class="amt-chip" data-amt-chip="10">₹10</button>
+          <button type="button" class="amt-chip" data-amt-chip="99">₹99</button>
+          <button type="button" class="amt-chip" data-amt-chip="499">₹499</button>
+          <button type="button" class="amt-chip" data-amt-chip="1499">₹1,499</button>
+        </div>
+
+        <div class="sandbox-inputs">
+          <div>
+            <label class="field-label" for="sandboxCustomAmount">Custom INR (₹)</label>
+            <input id="sandboxCustomAmount" type="number" class="field-input" value="1.00" min="1" max="100000" step="any" />
+          </div>
+          <div>
+            <label class="field-label" for="sandboxCustomerName">Buyer Name</label>
+            <input id="sandboxCustomerName" type="text" class="field-input" value="Aarav Sharma" placeholder="Buyer name" />
+          </div>
+        </div>
+
+        <button type="button" class="btn-pay-hero" data-launch-sandbox>
+          ⚡ Pay <span id="sandboxBtnAmt">₹1.00</span> with YOUPI Gateway →
+        </button>
+
+        <div class="sandbox-steps-hint">
+          <span>1️⃣ Enter any 10-digit mobile</span>
+          <span>2️⃣ 1-Tap Auto-Fill Demo OTP</span>
+          <span>3️⃣ Simulate Bank SMS Credit</span>
+        </div>
+
+        <div class="event-console" id="liveEventConsole">
+          <div>[READY] Listening for window CustomEvents (youpi:payment:*)...</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Unified Ecosystem Portals Section -->
+  <section class="section section-alt" id="portals">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow">Complete Multi-Portal Ecosystem</span>
+        <h2 class="section-title">Every Gateway Module — Live on One Unified Domain</h2>
+        <p class="section-desc">
+          Explore every production surface of YOUPI PG V2 directly in your browser: E-Commerce Storefront, White-Label Checkout, Merchant &amp; Cashier Admin Hub, Wallet Ledger, Support Desk, and API Explorer.
+        </p>
+      </div>
+
+      <div class="portals-grid">
+        <a href="/store" class="portal-card">
+          <div>
+            <div class="portal-icon">🛍️</div>
+            <h3>YOUPI Showcase Store</h3>
+            <p>Full reference e-commerce storefront integrated with <code>youpi.js</code>, custom amount packs, signed webhooks, and all 5 order outcome pages.</p>
+          </div>
+          <div class="portal-route">
+            <span>/store</span>
+            <span>Open Store →</span>
+          </div>
+        </a>
+
+        <a href="/admin" class="portal-card">
+          <div>
+            <div class="portal-icon">🛡️</div>
+            <h3>Merchant &amp; Cashier Hub</h3>
+            <p>Configure UPI VPAs, 100% white-label branding, Online/Offline Cashier POS Till desk, WhatsApp pairing, and Android APK enrollment.</p>
+          </div>
+          <div class="portal-route">
+            <span>/admin</span>
+            <span>Open Admin →</span>
+          </div>
+        </a>
+
+        <a href="/wallet" class="portal-card">
+          <div>
+            <div class="portal-icon">🪙</div>
+            <h3>Live Coin Wallet Ledger</h3>
+            <p>Inspect real-time coin balances credited via HMAC-SHA256 verified server webhooks after completing sandbox UPI checkouts.</p>
+          </div>
+          <div class="portal-route">
+            <span>/wallet</span>
+            <span>View Ledger →</span>
+          </div>
+        </a>
+
+        <a href="/help" class="portal-card">
+          <div>
+            <div class="portal-icon">💬</div>
+            <h3>Customer Support Portal</h3>
+            <p>Dedicated buyer payment assistance center for UTR verification guidance, delayed bank alerts, and merchant contact escalation.</p>
+          </div>
+          <div class="portal-route">
+            <span>/help</span>
+            <span>Open Support →</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4-Step Deterministic Architecture -->
+  <section class="section" id="architecture">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow">Mathematical Payment Invariants</span>
+        <h2 class="section-title">How Sovereign Bank Observation Works</h2>
+        <p class="section-desc">
+          Standard P2P UPI bank alerts do not carry merchant metadata. YOUPI PG solves payment attribution deterministically with four strict engineering invariants.
+        </p>
+      </div>
+
+      <div class="arch-steps">
+        <div class="arch-step">
+          <span class="step-num">STEP 01 · IDENTITY</span>
+          <h3>WhatsApp OTP Pre-Gate</h3>
+          <p>Buyers authenticate their 10-digit Indian mobile number via 6-digit WhatsApp OTP before entering the payment queue — stopping bots and fake orders cold.</p>
+        </div>
+
+        <div class="arch-step">
+          <span class="step-num">STEP 02 · FIFO ARBITER</span>
+          <h3>Exclusive Single-Slot VPA</h3>
+          <p>Only <strong>one active buyer</strong> occupies a receiving VPA at a time (5:00 window). Concurrent buyers wait in an atomic SQLite FIFO queue with live SSE updates.</p>
+        </div>
+
+        <div class="arch-step">
+          <span class="step-num">STEP 03 · VECTOR QR</span>
+          <h3>ISO-18004 Pure SVG QR</h3>
+          <p>Zero third-party QR APIs. Generates crisp vector UPI QR codes &amp; 1-tap mobile deep-links for GPay, PhonePe, Paytm, BHIM, and CRED in sub-millisecond time.</p>
+        </div>
+
+        <div class="arch-step">
+          <span class="step-num">STEP 04 · MESH VERIFY</span>
+          <h3>Tri-Channel Bank Mesh</h3>
+          <p>Native Android SMS/Notification APK + Gmail OAuth2 + Google Messages parse incoming bank credits, deduplicate UTRs, and dispatch HMAC-SHA256 webhooks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 Key Features + Native Android APK Download -->
+  <section class="section section-alt" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow">Engineered for Sovereign Merchants</span>
+        <h2 class="section-title">Enterprise-Grade Capabilities, Zero SaaS Lock-In</h2>
+        <p class="section-desc">
+          Built on native Node.js ESM, 64-bit integer Paise arithmetic, and embedded SQLite WAL — zero external Redis or Docker required.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="portal-icon">💸</div>
+          <h3>0% Fees &amp; T+0 Settlement</h3>
+          <p>Customer funds move directly from their UPI app to your bank account over standard NPCI rails with zero intermediary deductions or holdbacks.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="portal-icon">📱</div>
+          <h3>Native Android Observer APK</h3>
+          <p>Foreground Kotlin companion service captures cellular bank SMS &amp; push notifications, signing every observation with HMAC-SHA256 + anti-replay timestamps.</p>
+          <div style="margin-top:14px;">
+            <a href="/youpi-sms-gateway.apk" class="btn btn-outline" style="font-size:12.5px;padding:8px 13px;">
+              ⬇️ Download Android APK
+            </a>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="portal-icon">🏪</div>
+          <h3>Online COD + Retail Cashier POS</h3>
+          <p>Switch seamlessly between E-Commerce Mode (UPI QR + Verified COD) and Physical Store Mode (UPI + Cash at Till + Card at POS Terminal).</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="portal-icon">🎨</div>
+          <h3>100% White-Label Customizer</h3>
+          <p>Customize brand name, logo, accent colors, gradients, trust badges, custom CSS, and remove all gateway attribution directly from the Admin Hub.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="portal-icon">🔐</div>
+          <h3>Device Binding &amp; Fraud Ban</h3>
+          <p>Cryptographic device session tokens prevent duplicate tab hijacking while instant fraud rules block abusive accounts across sessions.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="portal-icon">🧮</div>
+          <h3>Integer Paise &amp; Dual Timers</h3>
+          <p>Every amount is processed in strict 64-bit integer Paise with server-authoritative 5-minute active and 30-second verification timers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Fee Savings Calculator & Comparison -->
+  <section class="section" id="calculator">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow">Transparent Economics</span>
+        <h2 class="section-title">Calculate How Much You Save vs Aggregators</h2>
+        <p class="section-desc">
+          Traditional payment gateways charge 2.0%–3.0% MDR + 18% GST on every order and hold your working capital for 2–3 business days.
+        </p>
+      </div>
+
+      <div class="calc-grid">
+        <div class="calc-panel">
+          <h3 style="font-family:var(--font-display);margin:0 0 20px;">Interactive MDR Savings Estimator</h3>
+
+          <div class="slider-group">
+            <div class="slider-top">
+              <span>Monthly UPI Sales Volume</span>
+              <span id="calcGmvVal" style="color:var(--emerald-400);">₹5,00,000 / mo</span>
+            </div>
+            <input id="calcVolumeSlider" type="range" class="range-input" min="25000" max="5000000" step="25000" value="500000" />
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-top">
+              <span>Typical Aggregator Fee</span>
+              <span id="calcMdrVal" style="color:var(--cyan-400);">2.0% + 18% GST (2.36%)</span>
+            </div>
+            <input id="calcAggregatorFeeSlider" type="range" class="range-input" min="1.5" max="3.5" step="0.1" value="2.0" />
+          </div>
+
+          <div style="font-size:13.5px;color:var(--rose-400);font-weight:700;" id="calcMonthlyFee">
+            ₹11,800 / month lost to aggregator
+          </div>
+
+          <div class="savings-highlight">
+            <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#a7f3d0;margin-bottom:4px;">
+              Estimated Annual Revenue Retained with YOUPI PG
+            </div>
+            <div class="savings-amount" id="calcAnnualSavings">₹1,41,600</div>
+            <div style="font-size:12.5px;color:var(--text-secondary);margin-top:6px;">
+              Direct bank transfer • Zero platform cut • 100% self-hosted control
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-panel">
+          <h3 style="font-family:var(--font-display);margin:0 0 16px;">Side-by-Side Architecture Matrix</h3>
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Capability</th>
+                <th>Legacy Gateways</th>
+                <th>YOUPI PG V2</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Transaction Fee</td>
+                <td>2%–3% + 18% GST</td>
+                <td class="comp-good">0.0% Forever</td>
+              </tr>
+              <tr>
+                <td>Settlement Cycle</td>
+                <td>T+2 to T+3 Days</td>
+                <td class="comp-good">Direct P2P UPI</td>
+              </tr>
+              <tr>
+                <td>Buyer Mobile Auth</td>
+                <td>Paid SMS Gateways</td>
+                <td class="comp-good">WhatsApp 6-Digit OTP</td>
+              </tr>
+              <tr>
+                <td>White-Label UI</td>
+                <td>Mandatory Gateway Logo</td>
+                <td class="comp-good">100% Your Brand</td>
+              </tr>
+              <tr>
+                <td>Retail Cashier Till</td>
+                <td>Paid POS Add-On</td>
+                <td class="comp-good">Built-In Cash &amp; Card</td>
+              </tr>
+              <tr>
+                <td>Database Engine</td>
+                <td>Proprietary Cloud</td>
+                <td class="comp-good">Native SQLite WAL</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visual Product Gallery -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow">Production Interfaces</span>
+        <h2 class="section-title">Designed for Desktop, Mobile &amp; Retail Counters</h2>
+        <p class="section-desc">
+          Responsive 2-column desktop checkout, fluid mobile bottom sheets with 1-tap UPI app intents, and real-time merchant operations dashboards.
+        </p>
+      </div>
+
+      <div class="screenshots-grid">
+        <div class="shot-card">
+          <img src="/assets/gateway_pc_checkout.png" alt="Desktop 2-Column UPI Checkout" loading="lazy" />
+          <div class="shot-caption">
+            <strong>Desktop 2-Column Vector QR Checkout</strong>
+            <span>Crisp ISO vector QR, server-authoritative timers, and live payment modality tabs.</span>
+          </div>
+        </div>
+
+        <div class="shot-card">
+          <img src="/assets/gateway_merchant_operations.png" alt="Merchant Operations Dashboard" loading="lazy" />
+          <div class="shot-caption">
+            <strong>Merchant Operations &amp; Live Slot Hub</strong>
+            <span>Real-time VPA queue monitor, Cashier POS Till approvals, and multi-channel observers.</span>
+          </div>
+        </div>
+
+        <div class="shot-card">
+          <img src="/assets/gateway_whitelabel_customizer.png" alt="White-Label Brand Studio" loading="lazy" />
+          <div class="shot-caption">
+            <strong>100% White-Label Brand Customizer</strong>
+            <span>Instant live preview for custom palettes, logos, conversion banners, and trust seals.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Developer One-Script SDK & Signed Webhooks -->
+  <section class="section" id="developers">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow">Developer-First DX</span>
+        <h2 class="section-title">Integrate in 60 Seconds with One Script Tag</h2>
+        <p class="section-desc">
+          Drop <code>/youpi.js</code> onto any HTML, React, Next.js, Vue, or Node.js storefront and verify server-to-server HMAC-SHA256 webhooks in 15 lines of code.
+        </p>
+      </div>
+
+      <div class="code-box">
+        <div class="code-tabs-bar">
+          <div class="code-tabs">
+            <button type="button" class="code-tab active" data-code-tab="html">HTML One-Button</button>
+            <button type="button" class="code-tab" data-code-tab="react">React / Next.js SDK</button>
+            <button type="button" class="code-tab" data-code-tab="webhook">Express HMAC Webhook</button>
+            <button type="button" class="code-tab" data-code-tab="curl">REST API (cURL)</button>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button type="button" class="btn btn-outline" id="btnCopyCode" style="padding:6px 12px;font-size:12px;">Copy Snippet</button>
+            <a href="/api-docs" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Live API Tester →</a>
+          </div>
+        </div>
+        <pre class="code-pre"><code id="codeSnippetOutput"></code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ & Research Scope Notice -->
+  <section class="section section-alt" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow">Frequently Asked Questions</span>
+        <h2 class="section-title">Everything You Need to Know</h2>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary>How does YOUPI PG verify UPI payments without aggregator APIs? <span>+</span></summary>
+          <div class="faq-body">
+            YOUPI PG pairs an exclusive single-slot FIFO queue per receiving VPA with a tri-channel observation mesh (Native Android SMS/Notification APK, Gmail OAuth2 API, and Google Messages). When your bank sends a credit alert matching the active slot's exact integer Paise amount, the Attribution Engine extracts the 12-digit UTR, marks the session <code>SUCCESS</code>, and dispatches a signed webhook.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>How do I test the live checkout right here on this website? <span>+</span></summary>
+          <div class="faq-body">
+            Click <strong>Try ₹1 Demo Checkout</strong> at the top of this page (or visit <a href="/store" style="color:var(--emerald-400);text-decoration:underline;">/store</a>). Enter any 10-digit Indian mobile number, click <strong>1-Tap Auto-Fill &amp; Verify</strong> on the sandbox OTP banner, and click <strong>Simulate Bank SMS Credit</strong> to watch real-time UTR attribution and webhook settlement!
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Can I customize the checkout UI with my own brand logo and colors? <span>+</span></summary>
+          <div class="faq-body">
+            Yes! Open the <a href="/admin" style="color:var(--emerald-400);text-decoration:underline;">Merchant Admin Hub (/admin)</a>, use the 1-Tap Demo Unlock in sandbox mode (or your <code>ADMIN_API_TOKEN</code> in self-hosted mode), and configure your app name, logo URL, primary color, Online/Offline selling mode, and custom receiving UPI IDs.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Should I fulfill orders from browser events or server webhooks? <span>+</span></summary>
+          <div class="faq-body">
+            Browser <code>youpi:payment:success</code> events are strictly for instant UI feedback. Always fulfill orders on your backend after verifying the raw-body <code>X-Gateway-Signature</code> (HMAC-SHA256) webhook and checking <code>payload.method === "UPI"</code>.
+          </div>
+        </details>
+      </div>
+
+      <div class="safety-banner">
+        <h4>⚠️ Research &amp; Experimental Project Notice</h4>
+        <p>
+          YOUPI PG V2 is an independent open-source software engineering &amp; payment-UX research project. It is not affiliated with or certified by NPCI, RBI, or any bank, and is not a licensed payment aggregator. For experimental real-money tests, keep volume conservative (&le;20 daily transactions per account), reconcile independently against official bank statements, and review all applicable bank and regulatory requirements before commercial use.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="brand-link" style="margin-bottom:12px;">
+            <div class="brand-mark">⚡</div>
+            <div>
+              <span class="brand-name">YOUPI PG V2</span>
+              <span class="brand-tag">SELF-HOSTED UPI GATEWAY</span>
+            </div>
+          </div>
+          <p style="color:var(--text-muted);font-size:13.5px;margin:0 0 14px;max-width:320px;">
+            Sovereign, zero-fee, white-label UPI payment gateway with WhatsApp OTP identity and automated multi-channel bank observation.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Live Portals</h4>
+          <ul>
+            <li><a href="/">Official Website Home</a></li>
+            <li><a href="/store">Showcase Demo Store</a></li>
+            <li><a href="/wallet">Coin Wallet Ledger</a></li>
+            <li><a href="/admin">Merchant &amp; Cashier Hub</a></li>
+            <li><a href="/help">Customer Help Portal</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Developers</h4>
+          <ul>
+            <li><a href="/docs">Documentation Hub</a></li>
+            <li><a href="/api-docs">Interactive API Explorer</a></li>
+            <li><a href="/openapi.yaml">OpenAPI 3.0 Spec (YAML)</a></li>
+            <li><a href="/youpi.js">Universal SDK (/youpi.js)</a></li>
+            <li><a href="/health">Gateway Health JSON</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Downloads &amp; Guides</h4>
+          <ul>
+            <li><a href="/youpi-sms-gateway.apk">Android Observer APK</a></li>
+            <li><a href="/docs/deployment">Deployment Guide</a></li>
+            <li><a href="/docs/developer-integration">Developer Integration</a></li>
+            <li><a href="/docs/white-label">White-Label Guide</a></li>
+            <li><a href="https://github.com/AgainHeist/YouPI-Getway" target="_blank" rel="noopener">GitHub Repository ↗</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 YOUPI PG V2 • Sovereign Self-Hosted Payment Gateway Suite</span>
+        <span>Built with Native Node.js ESM • SQLite WAL • ISO-18004 Vector QR</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/site/app.js"></script>
+</body>
+</html>

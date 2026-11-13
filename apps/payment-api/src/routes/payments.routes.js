@@ -17,7 +17,11 @@ import { isAdminRequest, isPaymentOwner } from '../auth-guard.js';
  * }} ctx
  */
 export function registerPaymentRoutes(server, ctx) {
-  function resolveCheckoutBaseUrl(merchant) {
+  function resolveCheckoutBaseUrl(merchant, req = null) {
+    if (process.env.YOUPI_UNIFIED_WEB === 'true' && req?.headers) {
+      // Same-origin relative URLs avoid trusting client-supplied Host/forwarded headers.
+      return '';
+    }
     if (merchant?.branding) {
       try {
         const urls = resolveRuntimeUrls(merchant.branding);
@@ -184,7 +188,7 @@ export function registerPaymentRoutes(server, ctx) {
           amountPaise: existing.amountPaise.toString(),
           currency: existing.currency,
           status: existing.status,
-          checkoutUrl: `${resolveCheckoutBaseUrl(merchant)}/checkout/${existing.id}`
+          checkoutUrl: `${resolveCheckoutBaseUrl(merchant, req)}/checkout/${existing.id}`
         });
         return;
       }
@@ -238,7 +242,7 @@ export function registerPaymentRoutes(server, ctx) {
           currency: existing.currency,
           status: existing.status,
           activeSessionDetected: true,
-          checkoutUrl: `${resolveCheckoutBaseUrl(merchant)}/checkout/${existing.id}`
+          checkoutUrl: `${resolveCheckoutBaseUrl(merchant, req)}/checkout/${existing.id}`
         });
         return;
       }
@@ -369,7 +373,7 @@ export function registerPaymentRoutes(server, ctx) {
       currency: session.currency,
       status: queueResult.status,
       queuePosition: queueResult.queuePosition,
-      checkoutUrl: `${resolveCheckoutBaseUrl(merchant)}/checkout/${session.id}`
+      checkoutUrl: `${resolveCheckoutBaseUrl(merchant, req)}/checkout/${session.id}`
     });
   });
 

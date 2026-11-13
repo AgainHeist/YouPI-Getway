@@ -1,4 +1,5 @@
 import { EventEmitter } from 'node:events';
+import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -7,6 +8,10 @@ import { generateQrSvg } from '@youpi/core';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../../../..');
+const defaultDataDir = process.env.YOUPI_DATA_DIR
+  || ((process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)
+    ? path.join(os.tmpdir(), 'youpi-pg-data')
+    : path.resolve(rootDir, 'data'));
 
 let BerryProtocolClass = null;
 let qrcodeLib = null;
@@ -103,9 +108,9 @@ export class WhatsAppBerryService extends EventEmitter {
   constructor(options = {}) {
     super();
     this.sessionId = options.sessionId || 'youpi_berry_session';
-    this.sessionPath = options.sessionPath || path.resolve(rootDir, 'data/berry_auth');
-    this.databasePath = options.databasePath || path.resolve(rootDir, 'data/berry_store.db');
-    this.metaFile = options.metaFile || path.resolve(rootDir, 'data/whatsapp_session.json');
+    this.sessionPath = options.sessionPath || path.join(defaultDataDir, 'berry_auth');
+    this.databasePath = options.databasePath || path.join(defaultDataDir, 'berry_store.db');
+    this.metaFile = options.metaFile || path.join(defaultDataDir, 'whatsapp_session.json');
 
     this.status = 'DISCONNECTED'; // 'DISCONNECTED' | 'QR_READY' | 'PAIRING_CODE_READY' | 'CONNECTING' | 'CONNECTED'
     this.phoneNumber = null;
@@ -244,7 +249,7 @@ export class WhatsAppBerryService extends EventEmitter {
         if (!settled) {
           settled = true;
           this.removeListener('qr', onQr);
-          if (!this.qrCode && process.env.NODE_ENV === 'test') {
+          if (!this.qrCode && (process.env.NODE_ENV === 'test' || process.env.YOUPI_DEMO_MODE === 'true')) {
             const { qrcode } = await loadDependencies();
             const fallbackStr = `https://wa.me/settings/linked_devices#2@mock_test_session_${Date.now()},mock_key,1`;
             const dataUrl = await formatQrDataUrl(fallbackStr, qrcode);
@@ -556,7 +561,7 @@ export class WhatsAppBerryService extends EventEmitter {
     const { BerryProtocol, qrcode } = await loadDependencies();
 
     if (!BerryProtocol) {
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.YOUPI_DEMO_MODE === 'true') {
         const mockCode = `${Math.floor(1000 + Math.random() * 9000)}${Math.floor(1000 + Math.random() * 9000)}`;
         this.pairingCode = mockCode;
         this.pairingPhone = clean;
@@ -582,14 +587,25 @@ export class WhatsAppBerryService extends EventEmitter {
       }, null, 2));
     } catch {}
 
-    this.client = new BerryProtocol({
-      sessionId: this.sessionId,
-      authFolder: this.sessionPath,
-      databasePath: this.databasePath,
-      printQrInTerminal: false,
-      reconnectDelayMs: 3000,
-      reconnectMaxAttempts: 15
-    });
+    try {
+      this.client = new BerryProtocol({
+        sessionId: this.sessionId,
+        authFolder: this.sessionPath,
+        databasePath: this.databasePath,
+        printQrInTerminal: false,
+        reconnectDelayMs: 3000,
+        reconnectMaxAttempts: 15
+      });
+    } catch (err) {
+      if (process.env.NODE_ENV === 'test' || process.env.YOUPI_DEMO_MODE === 'true') {
+        const mockCode = `${Math.floor(1000 + Math.random() * 9000)}${Math.floor(1000 + Math.random() * 9000)}`;
+        this.pairingCode = mockCode;
+        this.pairingPhone = clean;
+        this.status = 'PAIRING_CODE_READY';
+        return { success: true, pairingCode: mockCode, phoneNumber: clean };
+      }
+      throw err;
+    }
 
     this.setupListeners(qrcode);
 

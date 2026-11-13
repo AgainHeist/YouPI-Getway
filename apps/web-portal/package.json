@@ -1,0 +1,17 @@
+{
+  "name": "web-portal",
+  "version": "1.0.0",
+  "description": "Official Unified Website, Documentation Hub, Interactive Sandbox & Cloud Gateway Router for YOUPI PG V2",
+  "type": "module",
+  "main": "./src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test src/__tests__/**/*.test.js"
+  },
+  "dependencies": {
+    "@youpi/common": "*",
+    "@youpi/core": "*",
+    "@youpi/db": "*",
+    "@youpi/merchant-sdk": "*"
+  }
+}

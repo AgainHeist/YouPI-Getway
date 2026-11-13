@@ -498,9 +498,11 @@ export class CoinWalletStoreServer {
               createdAt: Date.now()
             });
 
-            // Normalize checkoutUrl for localhost development / testing to prevent tunnel offline issues
+            // Normalize checkoutUrl for unified web / localhost development to prevent cross-host or tunnel offline issues
             let resolvedCheckoutUrl = payment.checkoutUrl;
-            if (this.publicBaseUrl.includes('localhost') || this.publicBaseUrl.includes('127.0.0.1')) {
+            if (process.env.YOUPI_UNIFIED_WEB === 'true') {
+              resolvedCheckoutUrl = `/checkout/${payment.paymentId}`;
+            } else if (this.publicBaseUrl.includes('localhost') || this.publicBaseUrl.includes('127.0.0.1')) {
               resolvedCheckoutUrl = `${this.publicBaseUrl}/checkout/${payment.paymentId}`;
             }
 

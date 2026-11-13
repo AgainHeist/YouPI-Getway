@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
@@ -45,14 +46,29 @@ export class Database {
         dbPath = path.isAbsolute(process.env.SQLITE_DB_PATH)
           ? process.env.SQLITE_DB_PATH
           : path.resolve(repoRoot, process.env.SQLITE_DB_PATH);
+      } else if (process.env.YOUPI_DATA_DIR) {
+        dbPath = path.join(process.env.YOUPI_DATA_DIR, 'youpi_pg.sqlite');
+      } else if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+        dbPath = path.join(os.tmpdir(), 'youpi-pg-data', 'youpi_pg.sqlite');
       } else {
         dbPath = path.resolve(repoRoot, 'data/youpi_pg.sqlite');
       }
-      const dir = path.dirname(dbPath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+      let dir = path.dirname(dbPath);
+      try {
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+        }
+        this.db = new DatabaseSync(dbPath);
+      } catch (err) {
+        if (!options.dbPath && !process.env.SQLITE_DB_PATH && (err?.code === 'EROFS' || err?.code === 'EACCES')) {
+          dbPath = path.join(os.tmpdir(), 'youpi-pg-data', 'youpi_pg.sqlite');
+          dir = path.dirname(dbPath);
+          fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+          this.db = new DatabaseSync(dbPath);
+        } else {
+          throw err;
+        }
       }
-      this.db = new DatabaseSync(dbPath);
       // The file holds webhook secrets, session-token indexes, OTPs and customer PII.
       // Default file creation honours umask, which on many hosts leaves it group/world
       // readable, so restrict it explicitly.

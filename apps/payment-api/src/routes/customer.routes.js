@@ -257,8 +257,8 @@ export function registerCustomerRoutes(server, ctx) {
       message: 'OTP sent to your WhatsApp number.',
       mobileNumber: cleanMobile,
       expiresInSeconds: 300,
-      // Returning the OTP lets anyone log in as any number: only on explicit opt-in, never in production.
-      devOtp: (process.env.YOUPI_EXPOSE_DEV_OTP === 'true' && process.env.NODE_ENV !== 'production' ? otpCode : undefined),
+      // Returning the OTP lets anyone log in as any number: only on explicit opt-in, never in production (unless public demo sandbox mode is explicitly enabled).
+      devOtp: (((process.env.YOUPI_EXPOSE_DEV_OTP === 'true' && process.env.NODE_ENV !== 'production') || process.env.YOUPI_DEMO_MODE === 'true') ? otpCode : undefined),
       dispatch: dispatchResult
     });
   });

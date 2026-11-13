@@ -6,6 +6,7 @@ node_modules/
 # Build Outputs
 dist/
 **/dist/
+/dist-web/
 *.tsbuildinfo
 **/*.tsbuildinfo
 .tmp_apk_build/

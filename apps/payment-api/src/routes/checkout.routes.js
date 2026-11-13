@@ -212,6 +212,21 @@ async function checkUpiServerHealth(ctx, enabledMethods = [], sellingMode = 'OFF
     }
   } catch (err) {}
 
+  if (process.env.YOUPI_DEMO_MODE === 'true') {
+    return {
+      status: 'WORKING',
+      tier: 'GREEN',
+      label: 'Server Is Working',
+      isWorking: true,
+      reason: 'Interactive Cloud Sandbox Active: Vector QR & Bank SMS Verification Pipeline Ready',
+      smsHealthy: true,
+      gmailHealthy: true,
+      warning: null,
+      recommendedAlternative: null,
+      isDemoSandbox: true
+    };
+  }
+
   let smsHealthy = false;
   let gmailHealthy = false;
   let smsReason = 'SMS gateway disconnected';

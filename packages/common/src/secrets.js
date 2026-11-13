@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -6,7 +7,19 @@ import { encrypt, decrypt } from './crypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Resolved from this file, not cwd: every service must read the same files.
-const SECRETS_DIR = path.resolve(__dirname, '../../../data/.secrets');
+// On read-only serverless runtimes (e.g. Vercel / AWS Lambda), fall back to os.tmpdir().
+const DEFAULT_SECRETS_DIR = path.resolve(__dirname, '../../../data/.secrets');
+const TMP_SECRETS_DIR = path.join(os.tmpdir(), 'youpi-pg-data', '.secrets');
+
+function getWritableSecretsDir() {
+  if (process.env.YOUPI_DATA_DIR) {
+    return path.join(process.env.YOUPI_DATA_DIR, '.secrets');
+  }
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return TMP_SECRETS_DIR;
+  }
+  return DEFAULT_SECRETS_DIR;
+}
 
 const cache = new Map();
 
@@ -22,18 +35,28 @@ export function resolveSecret(name, envVar) {
   if (fromEnv) return fromEnv;
   if (cache.has(name)) return cache.get(name);
 
-  const file = path.join(SECRETS_DIR, name);
+  let secretsDir = getWritableSecretsDir();
+  let file = path.join(secretsDir, name);
   let value = '';
   try { value = fs.readFileSync(file, 'utf8').trim(); } catch {}
   if (!value) {
-    fs.mkdirSync(SECRETS_DIR, { recursive: true });
+    try {
+      fs.mkdirSync(secretsDir, { recursive: true });
+    } catch {
+      secretsDir = TMP_SECRETS_DIR;
+      file = path.join(secretsDir, name);
+      try { fs.mkdirSync(secretsDir, { recursive: true }); } catch {}
+    }
     const fresh = crypto.randomBytes(32).toString('hex');
     try {
       fs.writeFileSync(file, fresh, { flag: 'wx', mode: 0o600 });
       value = fresh;
     } catch {
-      // Another process created it first: use theirs.
-      value = fs.readFileSync(file, 'utf8').trim();
+      try {
+        value = fs.readFileSync(file, 'utf8').trim();
+      } catch {
+        value = fresh;
+      }
     }
   }
   cache.set(name, value);
