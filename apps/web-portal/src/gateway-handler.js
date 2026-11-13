@@ -167,7 +167,7 @@ export async function getUnifiedGatewayRuntime(options = {}) {
 
     // 1. Create and bind internal loopback PaymentApp so all internal service-to-service
     //    requests (CheckoutServer, CoinWalletStore, AdminServer) execute natively in <0.5ms.
-    const paymentApp = createPaymentApp(db);
+    const paymentApp = createPaymentApp(options.customDb ? db : null);
     const apiPort = await listenLoopback(paymentApp.rawServer);
     process.env.PAYMENT_API_PORT = String(apiPort);
     process.env.PAYMENT_API_INTERNAL_URL = `http://127.0.0.1:${apiPort}`;

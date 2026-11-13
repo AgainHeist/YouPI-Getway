@@ -60,6 +60,20 @@ describe('YOUPI PG V2 — Unified Complete Website & Cloud Gateway Suite', () =>
     }
   });
 
+  test('demo helpers are disabled unless explicitly enabled', async () => {
+    process.env.YOUPI_DEMO_MODE = 'false';
+    try {
+      for (const route of ['/api/demo/admin-unlock', '/api/demo/simulate-payment']) {
+        const res = await fetch(`${baseUrl}${route}`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+        });
+        assert.equal(res.status, 403, route);
+      }
+    } finally {
+      process.env.YOUPI_DEMO_MODE = 'true';
+    }
+  });
+
   test('5. End-to-end live checkout creation, QR SVG rendering, and sandbox Bank SMS settlement', async () => {
     // Create payment session via public API
     const createRes = await fetch(`${baseUrl}/api/v1/payments`, {
